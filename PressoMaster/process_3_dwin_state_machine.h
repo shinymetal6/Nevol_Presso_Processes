@@ -1,0 +1,53 @@
+/* 
+ * This program is free software: you can redistribute it and/or modify  
+ * it under the terms of the GNU General Public License as published by  
+ * the Free Software Foundation, version 3.
+ *
+ * This program is distributed in the hope that it will be useful, but 
+ * WITHOUT ANY WARRANTY; without even the implied warranty of 
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU 
+ * General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License 
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ *
+ * Project : A_os
+*/
+/*
+ * process_3_dwin_state_machine.h
+ *
+ *  Created on: Apr 15, 2025
+ *      Author: fil
+ */
+
+#ifndef PRESSOMASTER_PROCESS_3_DWIN_STATE_MACHINE_H_
+#define PRESSOMASTER_PROCESS_3_DWIN_STATE_MACHINE_H_
+
+typedef struct
+{
+	uint8_t		program_loaded;
+	uint8_t		running;
+	uint8_t		pause;
+	uint8_t		modified;
+	uint8_t		dwin_value;
+	uint16_t 	active_code;
+	uint16_t 	last_active_code;
+}DWIN_sm_typedef;
+
+#define	DWIN_CMDS_MASK		0xf0
+
+#define	DWIN_PROG_CMD_GLOBALTIME	0x01
+#define	DWIN_PROG_CMD_LOAD			0x02
+#define	DWIN_PROG_LOAD_HB			0x70
+#define	DWIN_PROG_CMD_HB			0x80
+#define	DWIN_PROG_CMD_MODCYCLE		0x20
+#define	DWIN_PROG_CMD_MODPRESSURE	0x50
+#define	DWIN_PROG_CMD_MODTIME		0x60
+#define	DWIN_PROG_PLAY				0x81
+#define	DWIN_PROG_STOP				0x80
+
+#define	DWIN_T_SECTOR	0x67
+#define	DWIN_PRESSURE	0x57
+
+
+#endif /* PRESSOMASTER_PROCESS_3_DWIN_STATE_MACHINE_H_ */
