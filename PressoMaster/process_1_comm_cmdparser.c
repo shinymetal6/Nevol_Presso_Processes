@@ -72,6 +72,10 @@ uint16_t	pnum;
 	{
 		if ( strcmp((char *)NevolSystem.command_from_host,"HLT") == 0 )
 			return CMDPARSER_RET_HLT;
+		if ( strcmp((char *)NevolSystem.command_from_host,"VER") == 0 )
+			return CMDPARSER_GET_VERSION;
+		if ( strcmp((char *)NevolSystem.command_from_host,"TAB") == 0 )
+			return CMDPARSER_RET_SETTABLES;
 	}
 	if ( pnum == 2)
 	{
@@ -95,8 +99,12 @@ uint16_t	pnum;
 			return CMDPARSER_PLAY_SOUND;
 		if ( strcmp((char *)NevolSystem.command_from_host,"TMT") == 0 )
 			return CMDPARSER_TEST_MOTOR;
-		if ( strcmp((char *)NevolSystem.command_from_host,"TOP") == 0 )
+		if ( strcmp((char *)NevolSystem.command_from_host,"TON") == 0 )
 			return CMDPARSER_TEST_OPEN;
+		if ( strcmp((char *)NevolSystem.command_from_host,"TOF") == 0 )
+			return CMDPARSER_TEST_CLOSE;
+		if ( strcmp((char *)NevolSystem.command_from_host,"AUT") == 0 )
+			return CMDPARSER_TEST_AUTORANGE;
 	}
 	return 0;
 }

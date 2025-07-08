@@ -30,9 +30,7 @@ QByteArray reply;
 
     if ( serial_started == 0 )
         return 1;
-    //QThread::msleep(10);
     serial.write(hex_line);
-    //QThread::msleep(50);
     return 1;
 }
 
@@ -40,13 +38,11 @@ int Nevol_DwTool::serial_rx( void)
 {
 QPixmap redled (":/ledred.png");
 QPixmap greenled(":/ledgreen.png");
-QByteArray reply;
 
-    //QThread::msleep(10);
     if(serial.waitForReadyRead(WAIT_REPLY))
     {
-        reply = serial.readAll();
-        const char *data = reply.data();
+        serial_reply = serial.readAll();
+        const char *data = serial_reply.data();
         return data[0];
     }
     qDebug()<< "RX timeout";
@@ -88,6 +84,13 @@ void Nevol_DwTool::on_Port_comboBox_currentTextChanged(const QString &arg1)
             ui->statusbar->showMessage(arg1+" : Serial port opened");
             serial.setReadBufferSize (1024);
             ui->frame->setEnabled(true);
+            serial.flush();
+            QString cmd = "< VER >";
+            qDebug()<<cmd;
+            serial_tx(cmd.toUtf8());
+            serial_rx();
+            qDebug()<< serial_reply;
+            ui->Version_label->setText(serial_reply);
         }
     }
     else
@@ -101,11 +104,9 @@ void Nevol_DwTool::on_Port_comboBox_currentTextChanged(const QString &arg1)
 
 void Nevol_DwTool:: create_buf_and_tx(char    *data)
 {
-#define SLEEP_HERE   10
     QByteArray ba4(QByteArray::fromRawData(data, 132));
     serial.flush();
     serial_tx(ba4);
-    //QThread::msleep(SLEEP_HERE);
 }
 
 void Nevol_DwTool::download_program(void)
@@ -189,8 +190,18 @@ void Nevol_DwTool::download_program(void)
     ui->FlashingEE_label->setPixmap(greenled);
 }
 
-#define PROGRAMS_PATH   "/Devel/Stm32_16.1_A_os_2025.05-rc/Nevol_Presso_Processes/Resources/Programs"
-#define AUDIO_PATH      "/Devel/Stm32_16.1_A_os_2025.04-rc/Nevol_Presso_Processes/Resources/Audio"
+#ifdef Q_OS_WIN
+#define PROGRAMS_PATH   "c:/Nevol_Presso_Resources/Programs"
+#define AUDIO_PATH      "c:/Nevol_Presso_Resources/Audio"
+#else
+/*
+#define PROGRAMS_PATH   "/Devel/Stm32_18.1_A_os_2025.06-rc/Nevol_Presso_Processes/Resources/Programs"
+#define AUDIO_PATH      "/Devel/Stm32_18.1_A_os_2025.06-rc/Nevol_Presso_Processes/Resources/Audio"
+*/
+#define PROGRAMS_PATH   "../../Resources/Programs"
+#define AUDIO_PATH      "../../Resources/Audio"
+#endif
+
 void Nevol_DwTool::on_SelectEEFile_pushButton_clicked()
 {
     QString filters = "CSV files (*.csv)";
@@ -222,6 +233,12 @@ void Nevol_DwTool::on_SelectEEFile_pushButton_clicked()
                 as[0] = blob[i+2];
                 ui->PRGNUM_label->setText(as);
             }
+            if ( blob[i] == 'P')
+            {
+                program_number = 'P';
+                qDebug()<<blob[i];
+                ui->PRGNUM_label->setText("P");
+            }
         }
         file.close();
     }
@@ -231,69 +248,25 @@ void Nevol_DwTool::on_SelectEEFile_pushButton_clicked()
 void Nevol_DwTool::on_DownloadEEFile_pushButton_clicked()
 {
 QString cmd;
-  QString tmp = tr("%1").arg(program_number);
-    serial.flush();
-    switch ( program_number)
+    if ( program_number != 'P' )
     {
-    case    31   :
-        cmd = "< PRG 31 >";
-        break;
-    case    0   :
-        cmd = "< PRG 0 >";
-        break;
-    case    1   :
-        cmd = "< PRG 1 >";
-        break;
-    case    2   :
-        cmd = "< PRG 2 >";
-        break;
-    case    3   :
-        cmd = "< PRG 3 >";
-        break;
-    case    4   :
-        cmd = "< PRG 4 >";
-        break;
-    case    5   :
-        cmd = "< PRG 5 >";
-        break;
-    case    6   :
-        cmd = "< PRG 6 >";
-        break;
-    case    7   :
-        cmd = "< PRG 7 >";
-        break;
-    case    8   :
-        cmd = "< PRG 8 >";
-        break;
-    case    9   :
-        cmd = "< PRG 9 >";
-        break;
-    case    10  :
-        cmd = "< PRG 10 >";
-        break;
-    case    11  :
-        cmd = "< PRG 11 >";
-        break;
-    case    12  :
-        cmd = "< PRG 12 >";
-        break;
-    case    13  :
-        cmd = "< PRG 13 >";
-        break;
-    case    14  :
-        cmd = "< PRG 14 >";
-        break;
-    case    15  :
-        cmd = "< PRG 15 >";
-        break;
+        QString tmp = tr("%1").arg(program_number);
+        serial.flush();
+        cmd = "< PRG "+tmp+" >";
+        qDebug()<<cmd;
+
+        serial_tx(cmd.toUtf8());
+        download_program();
     }
-
-    qDebug()<<cmd;
-
-    serial_tx(cmd.toUtf8());
-    download_program();
+    else
+    {
+        serial.flush();
+        cmd = "< TAB >";
+        qDebug()<<cmd;
+        serial_tx(cmd.toUtf8());
+        download_program();
+    }
 }
-
 
 void Nevol_DwTool::on_Run_pushButton_clicked()
 {
@@ -323,13 +296,6 @@ QString cmd;
         serial_tx(cmd.toUtf8());
         ui->Run_pushButton->setText("HALT");
     }
-
-}
-
-
-void Nevol_DwTool::on_SelectProgram_pushButton_clicked()
-{
-
 }
 
 void Nevol_DwTool::on_SelectAudioFile_pushButton_clicked()
@@ -487,41 +453,13 @@ void Nevol_DwTool::on_PlaySound_pushButton_clicked()
     serial_tx(cmd.toUtf8());
 }
 
-void Nevol_DwTool::on_Motor_pushButton_clicked()
-{
-    if ( ui->Motor_pushButton->text() == "Motor ON")
-    {
-        serial.flush();
-        QString cmd = "< TMT 1 >";
-        serial_tx(cmd.toUtf8());
-        ui->Motor_pushButton->setText("Motor OFF");
-    }
-    else
-    {
-        serial.flush();
-        QString cmd = "< TMT 0 >";
-        serial_tx(cmd.toUtf8());
-        ui->Motor_pushButton->setText("Motor ON");
-    }
-}
 
-void Nevol_DwTool::on_Open_1_pushButton_clicked()
+void Nevol_DwTool::on_VersionSound_pushButton_clicked()
 {
-    if ( ui->Open_1_pushButton->text() == "Open 1")
-    {
-        serial.flush();
-        QString cmd = "< TOP 1 >";
-        serial_tx(cmd.toUtf8());
-        ui->Open_1_pushButton->setText("Close 1");
-        qDebug()<<audio_file_name<<" Open 1";
-
-    }
-    else
-    {
-        serial.flush();
-        QString cmd = "< TOP 0 >";
-        serial_tx(cmd.toUtf8());
-        ui->Open_1_pushButton->setText("Open 1");
-        qDebug()<<audio_file_name<<" Close 1";
-    }
-}
+    serial.flush();
+    QString cmd = "< VER >";
+    qDebug()<<cmd;
+    serial_tx(cmd.toUtf8());
+    serial_rx();
+    qDebug()<< serial_reply;
+    ui->Version_label->setText(serial_reply);}

@@ -60,10 +60,16 @@ typedef struct
 #define	DWIN_STATUS_DISPLAY_OK		0x40
 /* state */
 
-
 /* usb_flags */
 #define	USB_FLAGS_HEADEROK		0x40
 #define	USB_FLAGS_PKTCOMPLETE	0x80
+
+#define	PARAMS_MAX_PROGRAMS		16
+#define	PARAMS_MAX_PRESSURES	16
+typedef struct
+{
+	uint8_t		pressure[PARAMS_MAX_PROGRAMS][PARAMS_MAX_PRESSURES];		// 256
+}Presso_parameters_TypeDef;
 
 #define	COMM_NORMAL_MODE		0
 #define	COMM_XMODEM_MODE		1
@@ -71,12 +77,15 @@ typedef struct
 #define	TRANSFER_XMODEM_CSV		0
 #define	TRANSFER_XMODEM_WAV		1
 
+#define	TRANSFER_CSV_PROGRAM	1
+
 #define	XMODEM_TIMEOUT			5
 
 #define	PRESSO_PROGRAM_SIZE		4096
 
-#define	PRESSO_PROGRAM_0_INDEX	0
-#define	PRESSO_MAX_PROGRAMS		32
+#define	PRESSO_PROGRAM_0_INDEX		0
+#define	PRESSO_MAX_PROGRAMS			32
+#define	PRESSO_PARAMETER_ADDRESS	8192
 
 #define BANK_2_ADDRESS	0x08100000
 
@@ -99,6 +108,7 @@ typedef struct
 #include "process_3_dwin_common.h"
 
 extern	NevolSystem_typedef			NevolSystem;
+extern	Presso_parameters_TypeDef	Presso_parameters;
 extern	Presso_ee_TypeDef			Presso_ee;
 extern	Presso_ee_TypeDef			Presso_opening_ee;
 extern	Presso_ee_TypeDef			Presso_closing_ee;

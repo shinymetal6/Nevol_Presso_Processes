@@ -47,6 +47,7 @@ UART_Drv_TypeDef Uart1_Drv =
 	.wakeup_id = WAKEUP_FROM_UART1_IRQ,
 	.timeout = 20,
 	.flags = UART_USES_DMA_TX | UART_USES_DMA_RX | UART_WAKEUP_ON_RXFULL | UART_WAKEUP_ON_TIMEOUT,
+	//.flags = UART_USES_DMA_TX  | UART_WAKEUP_ON_RXFULL | UART_WAKEUP_ON_TIMEOUT,
 };
 
 uint32_t	uart1_driver_handle;
@@ -97,15 +98,13 @@ uint32_t	cleared=0;
 		{
 			if ( cleared < 5 )
 			{
-				if (cleared == 0 )
+				if (cleared == 2 )
 					dwin_clear_fields(uart1_driver_handle);
-				if (cleared == 1 )
-					compile_and_send_5b_dwin_packet(uart1_driver_handle,PLAY_PAUSE_BTN_ADDR,PLAY_PAUSE_BTN_PLAY);
-				if ( cleared == 2 )
-					compile_and_send_5b_dwin_packet(uart1_driver_handle,HIGHLIGHT_RED,0);
-
 				cleared ++;
 			}
+			else
+				cleared = 6;
+
 			led_process();
 		}
 		if (( wakeup & WAKEUP_FROM_MBX) == WAKEUP_FROM_MBX)
@@ -121,20 +120,21 @@ uint32_t	cleared=0;
 				if ( hmi_from_seq_mbx[0] == SEQUENCE_FINISHED )
 				{
 					compile_and_send_5b_dwin_packet(uart1_driver_handle,PLAY_PAUSE_BTN_ADDR,PLAY_PAUSE_BTN_PLAY);
-					dwin_update_total_time(uart1_driver_handle,Presso_Sequencer.running_time);
+					Presso_Sequencer.cycle_time = Presso_ee.program_complete_time;
+					dwin_update_current_time(uart1_driver_handle);
 					dwin_state_machine_reset();
 				}
 				if ( hmi_from_seq_mbx[0] == ACTIVATE_CODE )
 				{
-					dwin_highlight_field(uart1_driver_handle,(hmi_from_seq_mbx[2]<<8 ) | hmi_from_seq_mbx[3]);
+					//dwin_highlight_field(uart1_driver_handle,(hmi_from_seq_mbx[2]<<8 ) | hmi_from_seq_mbx[3]);
 				}
 				if ( hmi_from_seq_mbx[0] == DEACTIVATE_CODE )
 				{
-					dwin_highlight_field(uart1_driver_handle,(hmi_from_seq_mbx[2]<<8 ) | hmi_from_seq_mbx[3]);
+					//dwin_highlight_field(uart1_driver_handle,(hmi_from_seq_mbx[2]<<8 ) | hmi_from_seq_mbx[3]);
 				}
 				if ( hmi_from_seq_mbx[0] == STEP_DONE )
 				{
-					dwin_update_total_time(uart1_driver_handle,(hmi_from_seq_mbx[1]<<8) | (hmi_from_seq_mbx[2] & 0xff));
+					dwin_update_current_time(uart1_driver_handle);
 				}
 			}
 		}

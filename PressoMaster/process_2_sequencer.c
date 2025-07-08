@@ -24,34 +24,36 @@
 #include "A_os_includes.h"
 #include "presso.h"
 
-__attribute__ ((aligned (32)))	Presso_ee_TypeDef			Presso_ee;
-__attribute__ ((aligned (32)))	Presso_ee_TypeDef			Presso_opening_ee;
-__attribute__ ((aligned (32)))	Presso_Sequencer_TypeDef	Presso_Sequencer;
-__attribute__ ((aligned (32)))	Presso_soundseq_TypeDef		Presso_soundseq;
+__attribute__ ((aligned (32)))	Presso_parameters_TypeDef			Presso_parameters ;
+__attribute__ ((aligned (32)))	Presso_ee_TypeDef					Presso_ee;
+__attribute__ ((aligned (32)))	Presso_ee_TypeDef					Presso_opening_ee;
+__attribute__ ((aligned (32)))	Presso_Sequencer_TypeDef			Presso_Sequencer;
+__attribute__ ((aligned (32)))	Presso_soundseq_TypeDef				Presso_soundseq;
+__attribute__ ((aligned (32)))	Presso_SequencerPressure_TypeDef	Presso_SequencerPressure;
 
 uint8_t		seq_from_comm_mbx_rxbuf[sizeof(uint32_t)];
 uint8_t		prc2_mbx_data[sizeof(uint32_t)];
 uint8_t		seq_from_hmi_mbx_rxbuf[sizeof(uint32_t)];
-//extern	uint8_t		prc3_mbx_data[sizeof(uint32_t)];
 
 uint8_t		mbx_seq_2_hmi[sizeof(uint32_t)];
 uint32_t	program_loaded = 0;
 
-
 extern	VCA_Effect_TypeDef	VCA_Effect1;
 extern	VCA_Effect_TypeDef	VCA_Effect2;
 
+//#define	SEQ_SM_DBG	1
 void process_2_sequencer(uint32_t process_id)
 {
 uint32_t	wakeup,flags;
 uint32_t	mbx_size;
 uint8_t		sequencer_prescaler;
+uint8_t		pressure_prescaler = 10;
+uint8_t		initial_sound_timeout = 0;
 
 	process_2_sequencer_init();
 	bzero((uint8_t *)&Presso_ee,sizeof(Presso_ee_TypeDef));
 	create_timer(TIMER_ID_0,PROCESS_SCHEDULE_TIME,TIMERFLAGS_FOREVER | TIMERFLAGS_ENABLED);
 	create_timer(TIMER_ID_1,10,TIMERFLAGS_FOREVER | TIMERFLAGS_ENABLED);
-	sound_seq_start(&Presso_Initial_sound[0]);
 	while(1)
 	{
 		wait_event(EVENT_TIMER | EVENT_MBX | i2c_24xx_Drv.wakeup_id | EVENT_ADC1_IRQ );
@@ -60,11 +62,21 @@ uint8_t		sequencer_prescaler;
 			pressure_manager();
 
 		if ((( wakeup & WAKEUP_FROM_TIMER) == WAKEUP_FROM_TIMER) && ((flags & TIMER_ID_1) == TIMER_ID_1))
+		{
+			if (initial_sound_timeout == 100 )
+				sound_seq_start(&Presso_Initial_sound[0]);
+			if (initial_sound_timeout > 101 )
+				initial_sound_timeout = 101;
 			sound_seq_run();
+			initial_sound_timeout++;
+		}
 		if ((( wakeup & WAKEUP_FROM_TIMER) == WAKEUP_FROM_TIMER) && ((flags & TIMER_ID_0) == TIMER_ID_0))
 		{
 			if ((Presso_Sequencer.state == SEQUENCER_STATE_OPENING ) || (Presso_Sequencer.state == SEQUENCER_STATE_RUNNING ))
 			{
+#ifdef SEQ_SM_DBG
+				sequencer_sm();
+#else
 				if ( sequencer_prescaler )
 					sequencer_prescaler--;
 				if ( sequencer_prescaler == 0 )
@@ -72,6 +84,7 @@ uint8_t		sequencer_prescaler;
 					sequencer_prescaler = SEQUENCER_TICK_TIME;
 					sequencer_sm();
 				}
+#endif
 			}
 			else
 				sequencer_prescaler = SEQUENCER_TICK_TIME;
@@ -84,6 +97,16 @@ uint8_t		sequencer_prescaler;
 				mbx_seq_2_hmi[0] = SEQUENCE_FINISHED;
 				mbx_seq_2_hmi[1] = 0;
 				mbx_send(PRESSO_HMI_PROCESS,PRESSO_HMI_MBX,mbx_seq_2_hmi,2);
+			}
+			pressure_prescaler--;
+			if ( pressure_prescaler == 0 )
+			{
+				pressure_prescaler = 10;
+				if ( (Presso_SequencerPressure.operating_mode & OPERATING_MODE_AUTORANGE ) == OPERATING_MODE_AUTORANGE)
+				{
+					if ( Presso_SequencerPressure.pressure < Presso_SequencerPressure.autorange_value )
+						process_2_sequencer_set_motor(1);
+				}
 			}
 		}
 		if (( wakeup & WAKEUP_FROM_MBX) == WAKEUP_FROM_MBX)
@@ -112,6 +135,18 @@ uint8_t		sequencer_prescaler;
 					break;
 				case CMDPARSER_RET_MUTE:
 					dac_stop_wav(dac_driver_handle);
+					break;
+				case CMDPARSER_TEST_MOTOR:
+					process_2_sequencer_set_motor(seq_from_comm_mbx_rxbuf[1]);
+					break;
+				case CMDPARSER_TEST_OPEN:
+					process_2_sequencer_test_set_gpio(seq_from_comm_mbx_rxbuf[1]);
+					break;
+				case CMDPARSER_TEST_CLOSE:
+					process_2_sequencer_test_unset_gpio(seq_from_comm_mbx_rxbuf[1]);
+					break;
+				case CMDPARSER_TEST_AUTORANGE:
+					process_2_sequencer_test_autorange(seq_from_comm_mbx_rxbuf[1]);
 					break;
 				}
 			}

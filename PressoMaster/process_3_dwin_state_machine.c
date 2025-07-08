@@ -80,7 +80,6 @@ uint16_t mod_prog_pressure(uint8_t program , uint8_t data)
 uint32_t process_from_dwin(uint32_t uart_driver_handle,uint8_t *uart1_rx_buffer,uint32_t uart_rxlen)
 {
 DWIN_packet_typedef	*DWIN_rxed_packet = (DWIN_packet_typedef *)uart1_rx_buffer;
-
 	if ( DWIN_rxed_packet->number_of_bytes != 6 )
 		return 1;
 	if ( DWIN_rxed_packet->address_h == DWIN_PROG_CMD_GLOBALTIME )
@@ -101,15 +100,31 @@ DWIN_packet_typedef	*DWIN_rxed_packet = (DWIN_packet_typedef *)uart1_rx_buffer;
 		mbx_send(PRESSO_SEQUENCER_PROCESS,PRESSO_HMI_MBX,hmi_to_seq_mbx,2);
 		return 0;
 	}
-	switch(DWIN_rxed_packet->address_h & DWIN_CMDS_MASK)
+	switch((DWIN_rxed_packet->address_h << 8) |  DWIN_rxed_packet->address_l )
 	{
-	case DWIN_PROG_CMD_HB :
+	case DWIN_PROG_CMD_HLB :
 		if ( DWIN_sm.program_loaded )
 		{
-			if ( DWIN_rxed_packet->address_h == DWIN_PROG_PLAY)
+			if ( DWIN_rxed_packet->data1_h == DWIN_PROG_INCTIME)
+			{
+				Presso_ee.program_complete_time++;
+				Presso_Sequencer.cycle_time = Presso_ee.program_complete_time;
+				dwin_update_current_time(uart_driver_handle);
+			}
+			if ( DWIN_rxed_packet->data1_h == DWIN_PROG_DECTIME)
+			{
+				if ( Presso_ee.program_complete_time )
+				{
+					Presso_ee.program_complete_time--;
+					Presso_Sequencer.cycle_time = Presso_ee.program_complete_time;
+					dwin_update_current_time(uart_driver_handle);
+				}
+			}
+			if ( DWIN_rxed_packet->data1_h == DWIN_PROG_PLAY)
 			{
 				if ( DWIN_sm.running == 0 )
 				{
+					Presso_Sequencer.cycle_time = Presso_ee.program_complete_time;
 					compile_and_send_5b_dwin_packet(uart_driver_handle,PLAY_PAUSE_BTN_ADDR,PLAY_PAUSE_BTN_PAUSE);
 					hmi_to_seq_mbx[0] = CMDPARSER_RET_RUN;
 					DWIN_sm.running = 1;
@@ -132,7 +147,7 @@ DWIN_packet_typedef	*DWIN_rxed_packet = (DWIN_packet_typedef *)uart1_rx_buffer;
 				hmi_to_seq_mbx[1] = DWIN_sm.program_loaded;
 				mbx_send(PRESSO_SEQUENCER_PROCESS,PRESSO_HMI_MBX,hmi_to_seq_mbx,2);
 			}
-			if ( DWIN_rxed_packet->address_h == DWIN_PROG_STOP)
+			if ( DWIN_rxed_packet->data1_h == DWIN_PROG_STOP)
 			{
 				hmi_to_seq_mbx[0] = CMDPARSER_RET_HLT;
 				hmi_to_seq_mbx[1] = DWIN_sm.program_loaded;

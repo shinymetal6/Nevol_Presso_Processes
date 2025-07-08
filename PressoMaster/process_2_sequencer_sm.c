@@ -62,13 +62,13 @@ uint8_t load_program_and_execute(uint8_t program_number)
 		{
 			Presso_Sequencer.program_number = program_number;
 			Presso_Sequencer.step_time = Presso_ee.program_step_time;
-			Presso_Sequencer.running_time = Presso_ee.program_complete_time;
+			//Presso_Sequencer.running_time = Presso_ee.program_complete_time;
 			if ( Presso_ee.program_has_opening == 0 )
 				Presso_Sequencer.state = SEQUENCER_STATE_RUNNING;
 			else
 			{
 				Presso_Sequencer.cycle_time += Presso_opening_ee.program_complete_time;
-				Presso_Sequencer.running_time = Presso_opening_ee.program_complete_time;
+				//Presso_Sequencer.running_time = Presso_opening_ee.program_complete_time;
 				Presso_Sequencer.state = SEQUENCER_STATE_OPENING;
 			}
 			Presso_Sequencer.sequence = 0;
@@ -87,11 +87,9 @@ uint8_t load_program(uint8_t program_number)
 			Presso_Sequencer.program_number = program_number;
 			Presso_Sequencer.sequence = 0;
 
-
-			Presso_Sequencer.running_time = Presso_ee.program_complete_time;
+			//Presso_Sequencer.running_time = Presso_ee.program_complete_time;
 			if ( Presso_ee.program_has_opening)
-				Presso_Sequencer.running_time += Presso_opening_ee.program_complete_time;
-			Presso_Sequencer.cycle_time = Presso_Sequencer.running_time;
+				Presso_Sequencer.cycle_time += Presso_opening_ee.program_complete_time;
 			return 0;
 		}
 	}
@@ -133,7 +131,7 @@ uint8_t halt_program(uint8_t program_number)
 	{
 		Presso_Sequencer.state = SEQUENCER_STATE_IDLE;
 		Presso_Sequencer.program_number = 0;
-		Presso_Sequencer.running_time = 0;
+		Presso_Sequencer.cycle_time = 0;
 		halt_sequencer();
 		return 0;
 	}
@@ -201,7 +199,6 @@ Presso_ee_TypeDef	*pstruct;
 			if ( Presso_Sequencer.cycle_time == 0 )
 			{
 				halt_sequencer();
-				Presso_Sequencer.cycle_time = Presso_Sequencer.running_time;
 
 				mbx_seq_2_hmi[0] = STEP_DONE;
 				mbx_seq_2_hmi[1] = Presso_Sequencer.cycle_time >> 8;

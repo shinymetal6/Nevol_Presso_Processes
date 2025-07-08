@@ -26,6 +26,7 @@
 #include "process_2_sequencer.h"
 
 extern	I2C_HandleTypeDef hi2c1;
+extern	Presso_SequencerPressure_TypeDef	Presso_SequencerPressure;
 
 
 uint8_t	i2cBufw[PRESSO_BUFFERSIZE];
@@ -78,10 +79,18 @@ DAC_Drv_TypeDef	dac_Drv =
 		.channel = DAC_CHANNEL_1,
 		.dac_buffer = out_buffer,
 		.len = NUMBER_OF_AUDIO_SAMPLES,
-		//.alignment = DAC_ALIGN_12B_L,
-		.flags = DAC_FLAGS_USE_AUDIOMODULE,
+		.alignment = DAC_ALIGN_12B_L,
+		.flags = DAC_FLAGS_USE_SYNTHMODULE,
 };
 uint32_t		dac_driver_handle;
+
+MidiSynth_TypeDef Audio_Synth =
+{
+		.status = SYNTH_ENABLED,
+		.out_buf = out_buffer,
+		.out_device = SYNTH_DAC_OUT,
+		.wavetable_size = SYNTH_WAVETABLE_1024,
+};
 
 extern	TIM_HandleTypeDef htim2;
 extern	TIM_HandleTypeDef htim3;
@@ -189,48 +198,54 @@ Presso_GPIO_TypeDef	Presso_GPIO[16] =
 		},
 };
 
-VCA_Effect_TypeDef	VCA_Effect1 =
+
+int16_t	passthrough_in_buffer2[HALF_NUMBER_OF_AUDIO_SAMPLES];
+
+PASSTHROUGH_Effect_TypeDef	passthrough_private2 =
 {
-		.flags = EFFECT_ENABLED,
-		.volume = 0.2F,
+		.call_counter = 0,
 };
 
-VCA_Effect_TypeDef	VCA_Effect2 =
+Effect_TypeDef passthrough2 =
 {
-		.flags = EFFECT_ENABLED,
-		.volume = 1.0F,
+		.status = SOUND_EFFECT_ENABLED,
+		.in_buf = passthrough_in_buffer2,
+		.private_data = (uint32_t *)&passthrough_private2,
+		.effect = Effect_Passthrough,
 };
 
-Echo_Effect_TypeDef	Echo_Effect =
+int16_t	vca_in_buffer[HALF_NUMBER_OF_AUDIO_SAMPLES];
+
+VCA_Effect_TypeDef	vca_private =
 {
-		.flags = EFFECT_ENABLED,
-		.delaySamples = HALF_NUMBER_OF_AUDIO_SAMPLES/2,
-		.feedbackGain = 0.1F,
+		.amplitude = 50,
 };
 
-DUMMY_Effect_TypeDef	DUMMY_Effect1 =
+Effect_TypeDef	VCA =
 {
-
+		.status = SOUND_EFFECT_ENABLED,
+		.in_buf = vca_in_buffer,
+		.private_data = (uint32_t *)&vca_private,
+		.effect = Effect_VCA,
 };
 
-NOISE_Gen_TypeDef	NOISE_Gen =
+int16_t	phaser_in_buffer[HALF_NUMBER_OF_AUDIO_SAMPLES];
+
+PHASER_Effect_TypeDef	phaser_private =
 {
-		.flags = EFFECT_ENABLED | NOISE_ADD,
-		.noise_weight = 0.01F,
+		.lfo_rate = PHASER_DEFAULT_LFO_RATE,
+		.depth = PHASER_DEFAULT_DEPTH,
+		.mix = PHASER_DEFAULT_MIX,
+		.allpass_number = PHASER_NUM_ALLPASS,
 };
 
-REVERB_Effect_TypeDef Reverb_Effect =
+Effect_TypeDef	PHASER =
 {
-		.flags = EFFECT_ENABLED,
-		.mix = REVERB_MIX,
-};
-
-PHASER_Effect_TypeDef PHASER_Effect =
-{
-		.flags = EFFECT_ENABLED,
-		.lfo_rate = PHASER_LFO_RATE/4,
-		.depth = PHASER_DEPTH,
-		.mix = PHASER_MIX,
+		.status = SOUND_EFFECT_ENABLED,
+		.in_buf = phaser_in_buffer,
+		.private_data = (uint32_t *)&phaser_private,
+		.effect = Effect_Phaser,
+		.effect_init = Effect_Phaser_Init,
 };
 
 void process_2_sequencer_init(void)
@@ -262,14 +277,10 @@ uint32_t	i;
 	dac_driver_handle = int_dac_register(&dac_Drv);
 	dac_init(dac_driver_handle);
 
-	InitOscillators();
-	effect_insert(Do_Dummy,NULL,(uint32_t *)&DUMMY_Effect1,dac_Drv.dac_buffer);
-	//effect_insert(Do_Noise,(uint32_t *)&NOISE_Gen,dac_Drv.dac_buffer);
-	effect_insert(Do_Vca,NULL,(uint32_t *)&VCA_Effect1,dac_Drv.dac_buffer);
-	//effect_insert(Do_Reverb,NULL,(uint32_t *)&Reverb_Effect,dac_Drv.dac_buffer);
-	effect_insert(Do_Phaser,NULL,(uint32_t *)&PHASER_Effect,dac_Drv.dac_buffer);
+	Synth_Init(&Audio_Synth);
+	Sound_Insert_Effect(&Audio_Synth,&PHASER);
+	Synth_Start(&Audio_Synth);
 
-	dac_start(dac_driver_handle);
 }
 
 void process_2_sequencer_set_gpio(uint16_t outconfig)
@@ -293,7 +304,6 @@ void process_2_sequencer_set_timers(uint32_t ht1,uint32_t ht2,uint32_t ht3,uint3
 	pwm_set_width(tim3_4_driver_handle,ht5*100);
 }
 
-/*
 void process_2_sequencer_set_motor(uint8_t motor)
 {
 	if ( motor )
@@ -301,11 +311,25 @@ void process_2_sequencer_set_motor(uint8_t motor)
 	else
 		HAL_GPIO_WritePin(MOTOR_ON_GPIO_Port, MOTOR_ON_Pin, GPIO_PIN_RESET);
 }
-*/
-void process_2_sequencer_set_test_gpio(uint8_t level)
+
+void process_2_sequencer_test_set_gpio(uint8_t gpio_number)
 {
-	if ( level )
-		HAL_GPIO_WritePin(Presso_GPIO[0].port, Presso_GPIO[0].bit, GPIO_PIN_SET);
-	else
-		HAL_GPIO_WritePin(Presso_GPIO[0].port, Presso_GPIO[0].bit, GPIO_PIN_RESET);
+	HAL_GPIO_WritePin(Presso_GPIO[gpio_number].port, Presso_GPIO[gpio_number].bit, GPIO_PIN_SET);
 }
+
+void process_2_sequencer_test_unset_gpio(uint8_t gpio_number)
+{
+	HAL_GPIO_WritePin(Presso_GPIO[gpio_number].port, Presso_GPIO[gpio_number].bit, GPIO_PIN_RESET);
+}
+
+void process_2_sequencer_test_autorange(uint8_t value)
+{
+	if ( value )
+	{
+		Presso_SequencerPressure.operating_mode |= OPERATING_MODE_AUTORANGE;
+		Presso_SequencerPressure.autorange_value = value;
+	}
+	else
+		Presso_SequencerPressure.operating_mode &= ~OPERATING_MODE_AUTORANGE;
+}
+

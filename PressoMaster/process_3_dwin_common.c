@@ -79,21 +79,89 @@ uint32_t compile_and_send_5b_dwin_packet_nowait(uint32_t uart_driver_handle,uint
 	return 0;
 }
 
+void compile_and_send_text_dwin(uint32_t uart_driver_handle,const char* text, uint16_t address)
+{
+uint32_t	i,bcount;
+int 		textLen;
+
+	DWIN_packet.start_flag_1 = HMI_HEADER1;
+	DWIN_packet.start_flag_2 = HMI_HEADER2;
+	DWIN_packet.number_of_bytes = 0x13;
+	DWIN_packet.command = HMI_WRITE_CMD;
+	DWIN_packet.address_h = address>>8;
+	DWIN_packet.address_l = address;
+
+    char *ptr = (char *)&DWIN_packet.data0_h;
+
+    memset(ptr,0x20,16);
+    if (strcmp(text, "Clear@") == 0)
+    {
+    	ptr[0] = '-';
+    	ptr[1] = '-';
+    	ptr[2] = ':';
+    	ptr[3] = '-';
+    	ptr[4] = '-';
+    	ptr[5] = 0;
+        bcount = strlen(ptr)+6;
+    }
+    else
+    {
+        textLen = strlen(text);
+        for (i = 0; i < textLen; i++)
+        	ptr[i] = text[i];
+        bcount = strlen(ptr)+6+1;
+    }
+    DWIN_packet.number_of_bytes = bcount;
+	dwinsend(uart_driver_handle,bcount);
+	task_delay(10);
+	dwinsend(uart_driver_handle,bcount);
+	task_delay(10);
+}
+
 void dwin_update_fields(uint32_t uart_driver_handle,Presso_ee_TypeDef *current_presso_ee)
 {
 uint32_t	i;
+int	minutes,seconds;
+char prgtime[16];
 
 	for(i=0;i<8;i++)
 	{
-		compile_and_send_5b_dwin_packet(uart_driver_handle,PRESSURE_BASE_ADDRESS+(i*0x100),current_presso_ee->program_pressure);
-		compile_and_send_5b_dwin_packet(uart_driver_handle,TSECTOR_BASE_ADDRESS+(i*0x100),current_presso_ee->program_step_time);
+		compile_and_send_5b_dwin_packet(uart_driver_handle,PRESSURE_BASE_ADDRESS+(i*0x10),current_presso_ee->Presso_ee_line->sector_pressure);
+		compile_and_send_5b_dwin_packet(uart_driver_handle,TSECTOR_BASE_ADDRESS+(i*0x10),current_presso_ee->program_step_time);
 	}
-	compile_and_send_5b_dwin_packet(uart_driver_handle,TOTAL_TIME_ADDRESS,Presso_Sequencer.cycle_time );
+	minutes = Presso_ee.program_complete_time / 60;
+	seconds = Presso_ee.program_complete_time - ( minutes * 60);
+	sprintf(prgtime,"%d:%d",minutes,seconds);
+	compile_and_send_text_dwin(uart_driver_handle,prgtime,TOTAL_TIME_ADDRESS);
 }
 
-uint32_t dwin_update_total_time(uint32_t uart_driver_handle,uint16_t total_time)
+uint32_t dwin_update_total_time(uint32_t uart_driver_handle)
 {
-	compile_and_send_5b_dwin_packet(uart_driver_handle,TOTAL_TIME_ADDRESS,total_time );
+char prgtime[16];
+int	minutes,seconds;
+
+	minutes = Presso_ee.program_complete_time / 60;
+	seconds = Presso_ee.program_complete_time - ( minutes * 60);
+	if ( seconds < 10 )
+		sprintf(prgtime,"%d:%02d",minutes,seconds);
+	else
+		sprintf(prgtime,"%d:%d",minutes,seconds);
+	compile_and_send_text_dwin(uart_driver_handle,prgtime,TOTAL_TIME_ADDRESS);
+	return 0;
+}
+
+uint32_t dwin_update_current_time(uint32_t uart_driver_handle)
+{
+char prgtime[16];
+int	minutes,seconds;
+
+	minutes = Presso_Sequencer.cycle_time / 60;
+	seconds = Presso_Sequencer.cycle_time - ( minutes * 60);
+	if ( seconds < 10 )
+		sprintf(prgtime,"%d:%02d",minutes,seconds);
+	else
+		sprintf(prgtime,"%d:%d",minutes,seconds);
+	compile_and_send_text_dwin(uart_driver_handle,prgtime,TOTAL_TIME_ADDRESS);
 	return 0;
 }
 
@@ -102,25 +170,12 @@ void dwin_clear_fields(uint32_t uart_driver_handle)
 uint32_t	i;
 	for(i=0;i<8;i++)
 	{
-		compile_and_send_5b_dwin_packet(uart_driver_handle,PRESSURE_BASE_ADDRESS+(i*0x100),0);
-		compile_and_send_5b_dwin_packet(uart_driver_handle,TSECTOR_BASE_ADDRESS+(i*0x100),0);
+		compile_and_send_5b_dwin_packet(uart_driver_handle,PRESSURE_BASE_ADDRESS+(i*0x10),0);
+		compile_and_send_5b_dwin_packet(uart_driver_handle,TSECTOR_BASE_ADDRESS+(i*0x10),0);
 	}
-	dwin_update_total_time(uart_driver_handle,0);
+	compile_and_send_5b_dwin_packet(uart_driver_handle,PLAY_PAUSE_BTN_ADDR,PLAY_PAUSE_BTN_PLAY);
+	compile_and_send_text_dwin(uart_driver_handle,"Clear@",TOTAL_TIME_ADDRESS);
 }
-
-uint32_t dwin_highlight_field(uint32_t uart_driver_handle,uint16_t field)
-{
-uint32_t	i;
-	for(i=0;i<8;i++)
-	{
-		if ( field == i )
-			compile_and_send_5b_dwin_packet(uart_driver_handle,HIGHLIGHT_RED+(i*0x100),i);
-		else
-			compile_and_send_5b_dwin_packet(uart_driver_handle,HIGHLIGHT_GRAY+(i*0x100),i);
-	}
-	return 0;
-}
-
 
 
 

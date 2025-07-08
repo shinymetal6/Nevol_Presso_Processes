@@ -27,22 +27,24 @@
 
 typedef struct
 {
-	uint8_t		line_number;
-	uint8_t		audionumber;
-	uint8_t		flags;
-	uint8_t		heater_values[5];
-	uint16_t	gpio;
-	uint8_t		sector_time;
-	uint8_t		sector_pressure;
-	uint8_t		unused[4];
+	uint8_t		line_number;		//1
+	uint8_t		audionumber;		//1
+	uint8_t		flags;				//1
+	uint8_t		heater_values[5];	//5
+	uint16_t	gpio;				//2
+	uint8_t		sector_time;		//1
+	uint8_t		sector_pressure;	//1
+	uint8_t		line_valid;			//1
+	uint8_t		unused[3];			//3
 }Presso_ee_line_TypeDef;
+#define	PRESSO_LINE_LOADED		0x7e
 
 /* the program header is 32 bytes long
  * a program line is 16 bytes long
  * there are 30 lines per program
  * size must be 512
 */
-#define	EE_PROG_NAME_SIZE		22
+#define	EE_PROG_NAME_SIZE		21
 #define	EE_MAX_LINE_NUMBER		30
 
 typedef struct
@@ -50,13 +52,12 @@ typedef struct
 	uint8_t					program_valid_flag;			// 1
 	uint8_t					program_number;				// 1
 	uint8_t					program_number_of_lines;	// 1
-	uint8_t					program_pressure;			// 1
 	uint8_t					program_has_opening;		// 1
 	uint8_t					program_close_eoc;			// 1
 	uint16_t				program_step_time;			// 2
 	uint16_t				program_complete_time;		// 2
 	char					program_name[EE_PROG_NAME_SIZE];
-	Presso_ee_line_TypeDef	Presso_ee_line[EE_MAX_LINE_NUMBER];
+	Presso_ee_line_TypeDef	Presso_ee_line[EE_MAX_LINE_NUMBER];	//4
 }Presso_ee_TypeDef;
 #define	EE_PROG_VALID_FLAG		0xe7
 #define	EE_PROG_HDR_SIZE		32

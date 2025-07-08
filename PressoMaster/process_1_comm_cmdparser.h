@@ -37,6 +37,10 @@
 #define	CMDPARSER_PLAY_SOUND			12
 #define	CMDPARSER_TEST_MOTOR			13
 #define	CMDPARSER_TEST_OPEN				14
+#define	CMDPARSER_TEST_CLOSE			15
+#define	CMDPARSER_TEST_AUTORANGE		16
+#define	CMDPARSER_GET_VERSION			30
+#define	CMDPARSER_RET_SETTABLES			31
 
 extern	uint8_t Host_pack_USB_packet(uint8_t *usb_rx_buffer,uint8_t len);
 extern	uint8_t parse_packet(uint8_t *rx_buf);

@@ -40,7 +40,7 @@ typedef struct
 	uint16_t			sequence;
 	uint16_t			step_time;
 	uint16_t			cycle_time;
-	uint16_t			running_time;
+	//uint16_t			running_time;
 }Presso_Sequencer_TypeDef;
 /*state*/
 #define	SEQUENCER_STATE_IDLE		0x00
@@ -93,10 +93,12 @@ extern	void process_2_sequencer_set_gpio(uint16_t outconfig);
 extern	void process_2_sequencer_set_timers(uint32_t ht1,uint32_t ht2,uint32_t ht3,uint32_t ht4,uint32_t ht5);
 extern	void process_2_sequencer_set_motor(uint8_t motor);
 extern	void process_2_sequencer_set_test_gpio(uint8_t level);
+extern	void process_2_sequencer_test_autorange(uint8_t value);
+
 extern	uint8_t load_program_and_execute(uint8_t program_number);
 extern	uint8_t load_program(uint8_t program_number);
 extern	uint8_t halt_program(uint8_t program_number);
-
-
+extern	void process_2_sequencer_test_set_gpio(uint8_t gpio_number);
+extern	void process_2_sequencer_test_unset_gpio(uint8_t gpio_number);
 
 #endif /* PROCESS_2_SEQUENCER_H_ */

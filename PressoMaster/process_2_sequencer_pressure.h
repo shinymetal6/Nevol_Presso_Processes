@@ -23,13 +23,27 @@
 #ifndef PRESSOMASTER_PROCESS_2_SEQUENCER_PRESSURE_H_
 #define PRESSOMASTER_PROCESS_2_SEQUENCER_PRESSURE_H_
 
+#define		INITIAL_NO_PRESSURE			256
+#define		INITIAL_PRESSURE_SAMPLES	512
+#define		PRESSURE_SAMPLES			1024
+
+#define		PRESSURE_OFFSET				50
+
 typedef struct
 {
+	uint8_t		operating_mode;
+	uint8_t		autorange_value;
+	uint16_t	zero_pressure_buffer[INITIAL_PRESSURE_SAMPLES];
+	uint16_t	pressure_buffer[PRESSURE_SAMPLES];
 	uint32_t	adc_zero_data;
+	uint16_t	adc_zero_acqcounter;
 	uint32_t	adc_data;
-	uint32_t	adc_zero_acqcounter;
+	uint32_t	pressure_buffer_index;
 	uint32_t	pressure;
+	uint32_t	pressure_buffer_number;
 }Presso_SequencerPressure_TypeDef;
+
+#define	OPERATING_MODE_AUTORANGE	0x80
 
 extern	ADC_Drv_TypeDef	adc_Drv;
 

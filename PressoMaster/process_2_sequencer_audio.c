@@ -24,6 +24,7 @@
 #include "A_os_includes.h"
 #include "presso.h"
 
+/*
 Presso_sound_TypeDef	Presso_Initial_sound1[] =
 {
 	{MIDI_NOTE_ON_FLAG|MIDI_NOTE_OFF_FLAG,67,100},
@@ -33,15 +34,16 @@ Presso_sound_TypeDef	Presso_Initial_sound1[] =
 	{MIDI_NOTE_ON_FLAG|MIDI_NOTE_OFF_FLAG,67,100},
 	{MIDI_NOTE_MUTE_FLAG,0,0},
 };
-
+*/
 Presso_sound_TypeDef	Presso_Initial_sound[] =
 {
-	{MIDI_NOTE_ON_FLAG,67,200},
-	{MIDI_NOTE_ON_FLAG,69,200},
-	{MIDI_NOTE_ON_FLAG,71,200},
-	{MIDI_NOTE_ON_FLAG,74,200},
-	{MIDI_NOTE_ON_FLAG,79,4600},
-	{MIDI_NOTE_MUTE_FLAG,0,0},
+		{MIDI_NOTE_ON_FLAG,67,200},
+		{MIDI_NOTE_ON_FLAG,67,200},
+		{MIDI_NOTE_ON_FLAG,69,200},
+		{MIDI_NOTE_ON_FLAG,71,200},
+		{MIDI_NOTE_ON_FLAG,74,200},
+		{MIDI_NOTE_ON_FLAG,79,4600},
+		{MIDI_NOTE_MUTE_FLAG,0,0},
 };
 
 void sound_seq_run ( void  )
@@ -57,14 +59,13 @@ Presso_sound_TypeDef *sound = Presso_soundseq.sound;
 	Presso_soundseq.beep_time--;
 	if ( Presso_soundseq.beep_time == 0 )
 	{
-
 		if (( sound[Presso_soundseq.beep_index].flags & MIDI_NOTE_OFF_FLAG) == MIDI_NOTE_OFF_FLAG)
-			NoteOFF( sound[Presso_soundseq.beep_index].midi_note , 1);
+			NoteOff( sound[Presso_soundseq.beep_index].midi_note);
 		Presso_soundseq.beep_index++;
 		if (( sound[Presso_soundseq.beep_index].flags & MIDI_NOTE_ON_FLAG) == MIDI_NOTE_ON_FLAG)
 		{
 			Presso_soundseq.beep_time = sound[Presso_soundseq.beep_index].time / 10;
-			NoteON( sound[Presso_soundseq.beep_index].midi_note , 1);
+			NoteOn( sound[Presso_soundseq.beep_index].midi_note , 100);
 		}
 		else
 		{
@@ -82,5 +83,5 @@ void sound_seq_start ( Presso_sound_TypeDef *sound )
 	Presso_soundseq.sound=sound;
 	Presso_soundseq.beep_time = sound[Presso_soundseq.beep_index].time / 10;
 	if ( sound[Presso_soundseq.beep_index].flags )
-		NoteON( sound[Presso_soundseq.beep_index].midi_note , 1);
+		NoteOn( sound[Presso_soundseq.beep_index].midi_note , 1);
 }

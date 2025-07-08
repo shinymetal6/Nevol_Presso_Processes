@@ -52,16 +52,14 @@ uint8_t		presso_flash_error = 0;
 uint8_t		parsed_cmd;
 uint8_t		comm_to_seq_mbx[2];
 
-void ee_write(uint32_t data_len)
+void ee_program_write(uint32_t data_len)
 {
 uint32_t	flash_address;
 Presso_ee_TypeDef	*pstruct;
 
-	if ( NevolSystem.param_from_host == 0 )
-		pstruct = &Presso_opening_ee;
-	else
-		pstruct = &Presso_ee;
-	flash_address = NevolSystem.param_from_host * sizeof(Presso_ee_TypeDef);
+	pstruct = &Presso_ee;
+
+	flash_address = pstruct->program_number * sizeof(Presso_ee_TypeDef);
 	if ( flash_address <= i2c_24xx_Drv.device_size - sizeof(Presso_ee_TypeDef))
 	{
 			if ( i2c_extflash_write(i2cflash_driver_handle, flash_address,(uint8_t *)pstruct,data_len) )
@@ -69,6 +67,13 @@ Presso_ee_TypeDef	*pstruct;
 	}
 }
 
+
+extern	uint8_t	app_version[32];
+void send_version(void)
+{
+	sprintf((char *)usb_tx_buffer,"App %s - Os %s",app_version,A_OS_VERSION);
+	usb_send(usb_driver_handle,usb_tx_buffer,strlen((char *)usb_tx_buffer));
+}
 
 void process_1_comm(uint32_t process_id)
 {
@@ -120,12 +125,13 @@ uint32_t	file_type;	// 0 for csv , 1 for wav, defaults to csv
 						ndecoded = decode_csv((uint8_t *)xmodem_data_area,xmodem_rx_get_rxed_amount());
 						if ( ndecoded )
 						{
-							ee_write(ndecoded);
+							ee_program_write(ndecoded);
 							usb_send(usb_driver_handle,&ack,1);
 						}
 						else
 							usb_send(usb_driver_handle,&nak,1);
 					}
+
 					if ( file_type == TRANSFER_XMODEM_WAV)
 					{
 						ndecoded = xmodem_rx_get_rxed_amount();
@@ -155,6 +161,7 @@ uint32_t	file_type;	// 0 for csv , 1 for wav, defaults to csv
 					switch(parsed_cmd)
 					{
 					case CMDPARSER_RET_PRG:
+					case CMDPARSER_RET_SETTABLES:
 						file_type = TRANSFER_XMODEM_CSV;
 						comm_state = COMM_XMODEM_MODE;
 						xmodem_usb_enable_poll = 1;
@@ -185,6 +192,20 @@ uint32_t	file_type;	// 0 for csv , 1 for wav, defaults to csv
 						comm_to_seq_mbx[1] = NevolSystem.param_from_host;
 						mbx_send(PRESSO_SEQUENCER_PROCESS,PRESSO_COMM_MBX,comm_to_seq_mbx,2);
 						break;
+					case CMDPARSER_TEST_CLOSE:
+						comm_to_seq_mbx[0] = parsed_cmd;
+						comm_to_seq_mbx[1] = NevolSystem.param_from_host;
+						mbx_send(PRESSO_SEQUENCER_PROCESS,PRESSO_COMM_MBX,comm_to_seq_mbx,2);
+						break;
+					case CMDPARSER_TEST_AUTORANGE:
+						comm_to_seq_mbx[0] = parsed_cmd;
+						comm_to_seq_mbx[1] = NevolSystem.param_from_host;
+						mbx_send(PRESSO_SEQUENCER_PROCESS,PRESSO_COMM_MBX,comm_to_seq_mbx,2);
+						break;
+					case CMDPARSER_GET_VERSION:
+						send_version();
+						break;
+
 					}
 				}
 			}

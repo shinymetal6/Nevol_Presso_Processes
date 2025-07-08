@@ -32,17 +32,13 @@ private slots:
 
     void on_SelectAudioFile_pushButton_clicked();
 
-    void on_SelectProgram_pushButton_clicked();
-
     void on_DownloadAudioFile_pushButton_clicked();
 
     void on_Play_pushButton_clicked();
 
     void on_PlaySound_pushButton_clicked();
 
-    void on_Motor_pushButton_clicked();
-
-    void on_Open_1_pushButton_clicked();
+    void on_VersionSound_pushButton_clicked();
 
 private:
     Ui::Nevol_DwTool *ui;
@@ -55,6 +51,8 @@ private:
 
     QSerialPort serial;
     int serial_started;
+    QByteArray serial_reply;
+
     unsigned char block_number,csum;
     int packets;
     int packets_errors;
