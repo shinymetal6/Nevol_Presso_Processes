@@ -1,0 +1,15 @@
+/linetype 
+/linetype 
+/ sound_number 
+/ |  sound_number_of_lines 
+/ |  |	sound_name
+/ |  |  | 
+A,1,12,SOUND_1
+/linetype linenumber midi_note midi_time(mSec.) note_stop
+N,1, 69,100,1
+N,2, 70,100,1
+N,3, 71,100,1
+N,4, 72,100,1
+N,5, 73,100,1
+N,6, 74,100,1
+E

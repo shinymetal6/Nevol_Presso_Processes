@@ -194,10 +194,6 @@ void Nevol_DwTool::download_program(void)
 #define PROGRAMS_PATH   "c:/Nevol_Presso_Resources/Programs"
 #define AUDIO_PATH      "c:/Nevol_Presso_Resources/Audio"
 #else
-/*
-#define PROGRAMS_PATH   "/Devel/Stm32_18.1_A_os_2025.06-rc/Nevol_Presso_Processes/Resources/Programs"
-#define AUDIO_PATH      "/Devel/Stm32_18.1_A_os_2025.06-rc/Nevol_Presso_Processes/Resources/Audio"
-*/
 #define PROGRAMS_PATH   "../../Resources/Programs"
 #define AUDIO_PATH      "../../Resources/Audio"
 #endif
@@ -232,12 +228,6 @@ void Nevol_DwTool::on_SelectEEFile_pushButton_clicked()
                 QString as;
                 as[0] = blob[i+2];
                 ui->PRGNUM_label->setText(as);
-            }
-            if ( blob[i] == 'P')
-            {
-                program_number = 'P';
-                qDebug()<<blob[i];
-                ui->PRGNUM_label->setText("P");
             }
         }
         file.close();

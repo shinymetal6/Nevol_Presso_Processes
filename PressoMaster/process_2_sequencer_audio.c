@@ -24,7 +24,7 @@
 #include "A_os_includes.h"
 #include "presso.h"
 
-/*
+
 Presso_sound_TypeDef	Presso_Initial_sound1[] =
 {
 	{MIDI_NOTE_ON_FLAG|MIDI_NOTE_OFF_FLAG,67,100},
@@ -34,7 +34,7 @@ Presso_sound_TypeDef	Presso_Initial_sound1[] =
 	{MIDI_NOTE_ON_FLAG|MIDI_NOTE_OFF_FLAG,67,100},
 	{MIDI_NOTE_MUTE_FLAG,0,0},
 };
-*/
+
 Presso_sound_TypeDef	Presso_Initial_sound[] =
 {
 		{MIDI_NOTE_ON_FLAG,67,200},
