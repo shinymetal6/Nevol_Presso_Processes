@@ -24,6 +24,7 @@
 #define PRESSOMASTER_PROCESS_2_SEQUENCER_AUDIO_H_
 
 extern	Presso_sound_TypeDef		Presso_Initial_sound[];
+extern	Presso_sound_TypeDef		Presso_Requested_sound[];
 extern	Presso_soundseq_TypeDef		Presso_soundseq;
 
 extern	void sound_seq_run ( void  );

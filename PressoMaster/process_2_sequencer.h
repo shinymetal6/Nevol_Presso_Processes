@@ -64,8 +64,8 @@ typedef struct
 typedef struct
 {
 	uint8_t					state;
-	uint8_t					beep_index;
-	uint8_t					beep_time;
+	uint8_t					note_index;
+	uint8_t					note_time;
 	Presso_sound_TypeDef	*sound;
 }Presso_soundseq_TypeDef;
 

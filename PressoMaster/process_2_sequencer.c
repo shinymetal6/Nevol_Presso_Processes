@@ -27,6 +27,7 @@
 __attribute__ ((aligned (32)))	Presso_parameters_TypeDef			Presso_parameters ;
 __attribute__ ((aligned (32)))	Presso_ee_TypeDef					Presso_ee;
 __attribute__ ((aligned (32)))	Presso_ee_TypeDef					Presso_opening_ee;
+__attribute__ ((aligned (32)))	Presso_ee_sound_TypeDef				Presso_ee_sound;
 __attribute__ ((aligned (32)))	Presso_Sequencer_TypeDef			Presso_Sequencer;
 __attribute__ ((aligned (32)))	Presso_soundseq_TypeDef				Presso_soundseq;
 __attribute__ ((aligned (32)))	Presso_SequencerPressure_TypeDef	Presso_SequencerPressure;
@@ -64,7 +65,7 @@ uint8_t		initial_sound_timeout = 0;
 		if ((( wakeup & WAKEUP_FROM_TIMER) == WAKEUP_FROM_TIMER) && ((flags & TIMER_ID_1) == TIMER_ID_1))
 		{
 			if (initial_sound_timeout == 100 )
-				sound_seq_start(&Presso_Initial_sound[0]);
+				sound_play(0);
 			if (initial_sound_timeout > 101 )
 				initial_sound_timeout = 101;
 			sound_seq_run();
@@ -135,6 +136,9 @@ uint8_t		initial_sound_timeout = 0;
 					break;
 				case CMDPARSER_RET_MUTE:
 					dac_stop_wav(dac_driver_handle);
+					break;
+				case CMDPARSER_PLAY_SOUND:
+					sound_play(seq_from_comm_mbx_rxbuf[1]);
 					break;
 				case CMDPARSER_TEST_MOTOR:
 					process_2_sequencer_set_motor(seq_from_comm_mbx_rxbuf[1]);

@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>854</width>
-    <height>464</height>
+    <height>495</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -125,9 +125,9 @@
     <property name="geometry">
      <rect>
       <x>10</x>
-      <y>60</y>
+      <y>40</y>
       <width>841</width>
-      <height>341</height>
+      <height>401</height>
      </rect>
     </property>
     <property name="frameShape">
@@ -326,7 +326,7 @@
      <property name="geometry">
       <rect>
        <x>250</x>
-       <y>180</y>
+       <y>150</y>
        <width>551</width>
        <height>23</height>
       </rect>
@@ -361,7 +361,7 @@
      <property name="geometry">
       <rect>
        <x>200</x>
-       <y>150</y>
+       <y>120</y>
        <width>601</width>
        <height>21</height>
       </rect>
@@ -380,7 +380,7 @@
      <property name="geometry">
       <rect>
        <x>10</x>
-       <y>180</y>
+       <y>150</y>
        <width>181</width>
        <height>27</height>
       </rect>
@@ -393,7 +393,7 @@
      <property name="geometry">
       <rect>
        <x>10</x>
-       <y>150</y>
+       <y>120</y>
        <width>181</width>
        <height>27</height>
       </rect>
@@ -406,7 +406,7 @@
      <property name="geometry">
       <rect>
        <x>200</x>
-       <y>180</y>
+       <y>150</y>
        <width>41</width>
        <height>30</height>
       </rect>
@@ -456,7 +456,7 @@
      <property name="geometry">
       <rect>
        <x>10</x>
-       <y>210</y>
+       <y>180</y>
        <width>181</width>
        <height>27</height>
       </rect>
@@ -469,7 +469,7 @@
      <property name="geometry">
       <rect>
        <x>200</x>
-       <y>210</y>
+       <y>180</y>
        <width>41</width>
        <height>30</height>
       </rect>
@@ -519,7 +519,7 @@
      <property name="geometry">
       <rect>
        <x>10</x>
-       <y>260</y>
+       <y>290</y>
        <width>181</width>
        <height>27</height>
       </rect>
@@ -532,11 +532,16 @@
      <property name="geometry">
       <rect>
        <x>200</x>
-       <y>260</y>
+       <y>290</y>
        <width>41</width>
        <height>30</height>
       </rect>
      </property>
+     <item>
+      <property name="text">
+       <string>0</string>
+      </property>
+     </item>
      <item>
       <property name="text">
        <string>1</string>
@@ -595,7 +600,7 @@
      <property name="geometry">
       <rect>
        <x>590</x>
-       <y>310</y>
+       <y>360</y>
        <width>241</width>
        <height>19</height>
       </rect>
@@ -608,13 +613,106 @@
      <property name="geometry">
       <rect>
        <x>10</x>
-       <y>310</y>
+       <y>360</y>
        <width>181</width>
        <height>27</height>
       </rect>
      </property>
      <property name="text">
       <string>Version</string>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="SelectSoundFile_pushButton">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>230</y>
+       <width>181</width>
+       <height>27</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Select Sound File   </string>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="DownloadSoundFile_pushButton">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>260</y>
+       <width>181</width>
+       <height>27</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Download Sound File</string>
+     </property>
+    </widget>
+    <widget class="QLabel" name="RXSound_label">
+     <property name="enabled">
+      <bool>true</bool>
+     </property>
+     <property name="geometry">
+      <rect>
+       <x>810</x>
+       <y>260</y>
+       <width>22</width>
+       <height>22</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string/>
+     </property>
+     <property name="pixmap">
+      <pixmap resource="Nevol_DwTool.qrc">:/ledred.png</pixmap>
+     </property>
+     <property name="scaledContents">
+      <bool>true</bool>
+     </property>
+    </widget>
+    <widget class="QProgressBar" name="downloadSound_progressBar">
+     <property name="geometry">
+      <rect>
+       <x>200</x>
+       <y>260</y>
+       <width>601</width>
+       <height>23</height>
+      </rect>
+     </property>
+     <property name="value">
+      <number>0</number>
+     </property>
+    </widget>
+    <widget class="QLabel" name="label_SOUND_FILE">
+     <property name="geometry">
+      <rect>
+       <x>200</x>
+       <y>230</y>
+       <width>541</width>
+       <height>21</height>
+      </rect>
+     </property>
+     <property name="frameShape">
+      <enum>QFrame::StyledPanel</enum>
+     </property>
+     <property name="frameShadow">
+      <enum>QFrame::Sunken</enum>
+     </property>
+     <property name="text">
+      <string/>
+     </property>
+    </widget>
+    <widget class="QLabel" name="SEQNUM_label">
+     <property name="geometry">
+      <rect>
+       <x>750</x>
+       <y>230</y>
+       <width>51</width>
+       <height>19</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string/>
      </property>
     </widget>
    </widget>

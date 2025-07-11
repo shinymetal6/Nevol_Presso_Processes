@@ -32,15 +32,16 @@
 #define	CMDPARSER_RET_SET_GLBTIME		7
 #define	CMDPARSER_RET_HLT				8
 #define	CMDPARSER_RET_WAV				9
-#define	CMDPARSER_RET_PLAY				10
-#define	CMDPARSER_RET_MUTE				11
-#define	CMDPARSER_PLAY_SOUND			12
-#define	CMDPARSER_TEST_MOTOR			13
-#define	CMDPARSER_TEST_OPEN				14
-#define	CMDPARSER_TEST_CLOSE			15
-#define	CMDPARSER_TEST_AUTORANGE		16
+#define	CMDPARSER_RET_SOUND				10
+#define	CMDPARSER_RET_PLAY				11
+#define	CMDPARSER_RET_MUTE				12
+#define	CMDPARSER_PLAY_SOUND			13
+#define	CMDPARSER_TEST_MOTOR			14
+#define	CMDPARSER_TEST_OPEN				15
+#define	CMDPARSER_TEST_CLOSE			16
+#define	CMDPARSER_TEST_AUTORANGE		17
 #define	CMDPARSER_GET_VERSION			30
-#define	CMDPARSER_RET_SETTABLES			31
+//#define	CMDPARSER_RET_SETTABLES			31
 
 extern	uint8_t Host_pack_USB_packet(uint8_t *usb_rx_buffer,uint8_t len);
 extern	uint8_t parse_packet(uint8_t *rx_buf);

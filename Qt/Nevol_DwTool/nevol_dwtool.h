@@ -40,6 +40,10 @@ private slots:
 
     void on_VersionSound_pushButton_clicked();
 
+    void on_SelectSoundFile_pushButton_clicked();
+
+    void on_DownloadSoundFile_pushButton_clicked();
+
 private:
     Ui::Nevol_DwTool *ui;
 
@@ -48,6 +52,7 @@ private:
     void create_buf_and_tx(char    *data);
     void download_program(void);
     void download_audio(void);
+    void download_sound(void);
 
     QSerialPort serial;
     int serial_started;
@@ -68,6 +73,12 @@ private:
     QString audio_file_name;
     QString audio_fileversion;
     int audio_file_size;
+
+    QString sound_filename;
+    QString sound_sequence_filename;
+    QString sound_sequence_file_name;
+    int sound_sequence_file_size;
+    int sound_sequence_number;
 
     QByteArray blob;
     int program_number;

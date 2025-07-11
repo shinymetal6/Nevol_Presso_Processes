@@ -46,6 +46,7 @@ typedef struct
 */
 #define	EE_PROG_NAME_SIZE		21
 #define	EE_MAX_LINE_NUMBER		30
+#define	EE_MAX_SOUNDLINE_NUMBER	20
 
 typedef struct
 {
@@ -63,6 +64,26 @@ typedef struct
 #define	EE_PROG_HDR_SIZE		32
 #define	EE_PROG_LINE_SIZE		16
 
+
+typedef struct
+{
+	uint8_t		midi_note;			//1
+	uint16_t	midi_time;			//1
+	uint8_t		midi_flag;			//1
+}Presso_ee_line_sound_TypeDef;
+
+typedef struct
+{
+	uint8_t					sound_valid_flag;			// 1
+	uint8_t					sound_number;				// 1
+	uint8_t					sound_number_of_lines;		// 1
+	Presso_ee_line_sound_TypeDef	Presso_ee_sound_line[EE_MAX_SOUNDLINE_NUMBER];	//4
+}Presso_ee_sound_TypeDef;
+#define	EE_SOUND_VALID_FLAG		0xe7
+#define	EE_SOUND_HDR_SIZE		16
+#define	EE_SOUND_LINE_SIZE		4
+
 extern	uint32_t mem_load_program(uint8_t program_number);
+extern	uint32_t mem_load_sound(uint8_t sound_number,Presso_ee_sound_TypeDef *sound_struct);
 
 #endif /* PROCESS_2_SEQUENCER_MEMPARSER_H_ */

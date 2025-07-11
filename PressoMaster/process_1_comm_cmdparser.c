@@ -74,13 +74,13 @@ uint16_t	pnum;
 			return CMDPARSER_RET_HLT;
 		if ( strcmp((char *)NevolSystem.command_from_host,"VER") == 0 )
 			return CMDPARSER_GET_VERSION;
-		if ( strcmp((char *)NevolSystem.command_from_host,"TAB") == 0 )
-			return CMDPARSER_RET_SETTABLES;
 	}
 	if ( pnum == 2)
 	{
 		if ( strcmp((char *)NevolSystem.command_from_host,"PRG") == 0 )
 			return CMDPARSER_RET_PRG;
+		if ( strcmp((char *)NevolSystem.command_from_host,"SSQ") == 0 )
+			return CMDPARSER_RET_SOUND;
 		if ( strcmp((char *)NevolSystem.command_from_host,"WAV") == 0 )
 			return CMDPARSER_RET_WAV;
 		if ( strcmp((char *)NevolSystem.command_from_host,"LOR") == 0 )

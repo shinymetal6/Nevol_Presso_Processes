@@ -74,8 +74,9 @@ typedef struct
 #define	COMM_NORMAL_MODE		0
 #define	COMM_XMODEM_MODE		1
 
-#define	TRANSFER_XMODEM_CSV		0
-#define	TRANSFER_XMODEM_WAV		1
+#define	TRANSFER_XMODEM_CSV			0
+#define	TRANSFER_XMODEM_SOUND_CSV	1
+#define	TRANSFER_XMODEM_WAV			2
 
 #define	TRANSFER_CSV_PROGRAM	1
 
@@ -85,7 +86,8 @@ typedef struct
 
 #define	PRESSO_PROGRAM_0_INDEX		0
 #define	PRESSO_MAX_PROGRAMS			32
-#define	PRESSO_PARAMETER_ADDRESS	8192
+#define	PRESSO_SOUND_ADDRESS		8192
+#define	PRESSO_MAX_SOUNDS			8
 
 #define BANK_2_ADDRESS	0x08100000
 
@@ -113,6 +115,7 @@ extern	Presso_ee_TypeDef			Presso_ee;
 extern	Presso_ee_TypeDef			Presso_opening_ee;
 extern	Presso_ee_TypeDef			Presso_closing_ee;
 extern	Presso_Sequencer_TypeDef	Presso_Sequencer;
+extern	Presso_ee_sound_TypeDef		Presso_ee_sound;
 
 extern	uint32_t analyze_dwin_packet(uint8_t *packet , uint16_t len);
 

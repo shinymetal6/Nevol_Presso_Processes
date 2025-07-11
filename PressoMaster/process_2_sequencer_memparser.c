@@ -48,3 +48,16 @@ uint32_t	ret_val;
 }
 
 
+uint32_t mem_load_sound(uint8_t sound_number,Presso_ee_sound_TypeDef *sound_struct)
+{
+uint32_t	flash_address = PRESSO_SOUND_ADDRESS , size=sizeof(Presso_ee_sound_TypeDef);
+uint32_t	ret_val;
+
+	bzero((uint8_t *)sound_struct,size);
+	ret_val = i2c_extflash_read(i2cflash_driver_handle,flash_address,(uint8_t *)sound_struct,size);
+	if ((ret_val == 0) && (sound_struct->sound_valid_flag == EE_SOUND_VALID_FLAG))
+		return ret_val;
+	return 1;
+}
+
+

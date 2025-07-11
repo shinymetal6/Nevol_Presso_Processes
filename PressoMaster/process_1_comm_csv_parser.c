@@ -57,6 +57,9 @@ uint16_t	gpioval = 0;
 int		table_number,table_number_of_lines;
 int		params_line_number,pval[PARAMS_MAX_PRESSURES];
 
+int		sound_number,sound_number_of_lines;
+int		sound_line_number,sound_midi_note,sound_midi_time,sound_midi_flags;
+
 uint32_t decode_csv(uint8_t *data_ptr,uint32_t data_len)
 {
 uint32_t cr_index = 0;
@@ -70,6 +73,59 @@ int	pnum;
 	{
 		switch(*data_ptr)
 		{
+		case 'A' :
+			cr_index = find_csv_cr(data_ptr);
+			if ( cr_index == 0 )
+				return 0;
+			pnum = sscanf((char *)data_ptr,"A,%d,%d,%s",
+					&sound_number,
+					&sound_number_of_lines,
+					program_name
+					);
+			if ( pnum == 3 )
+			{
+				Presso_ee_sound.sound_number = sound_number;
+				Presso_ee_sound.sound_number_of_lines = sound_number_of_lines;
+				char_processed +=EE_SOUND_HDR_SIZE;
+				data_ptr += cr_index;
+			}
+			else
+				return 0;
+			break;
+		case 'N' :
+			cr_index = find_csv_cr(data_ptr);
+			if ( cr_index == 0 )
+				return 0;
+			//linetype linenumber midi_note midi_time(mSec.) midi_flag
+			pnum = sscanf((char *)data_ptr,"N,%d,%d,%d,%d",
+					&sound_line_number,
+					&sound_midi_note,
+					&sound_midi_time,
+					&sound_midi_flags
+					);
+			if ( pnum == 4 )
+			{
+				Presso_ee_sound.Presso_ee_sound_line[line_index].midi_note = sound_midi_note;
+				Presso_ee_sound.Presso_ee_sound_line[line_index].midi_time = sound_midi_time;
+				Presso_ee_sound.Presso_ee_sound_line[line_index].midi_flag = sound_midi_flags;
+
+				char_processed +=EE_SOUND_LINE_SIZE;
+				line_index++;
+				data_ptr += cr_index;
+			}
+			else
+				return 0;
+			break;
+		case 'Q' :
+			cr_index = find_csv_cr(data_ptr);
+			if ( cr_index == 0 )
+				return 0;
+			Presso_ee_sound.sound_valid_flag = EE_SOUND_VALID_FLAG;
+			if ( line_index != Presso_ee_sound.sound_number_of_lines)
+				Presso_ee_sound.sound_number_of_lines = line_index;
+			char_processed ++;
+			return char_processed;
+			break;
 		case 'S' :
 			cr_index = find_csv_cr(data_ptr);
 			if ( cr_index == 0 )
@@ -101,7 +157,6 @@ int	pnum;
 				pstruct->program_step_time = program_step_time;
 				pstruct->program_complete_time = (program_complete_minute_time*60) + program_complete_seconds_time;
 				pstruct->program_close_eoc = program_close_eoc;
-				pstruct->program_valid_flag = EE_PROG_VALID_FLAG;
 				sprintf(pstruct->program_name,"%s",program_name);
 				if ( char_processed > sizeof(Presso_ee_TypeDef))
 					return 0;
@@ -155,6 +210,7 @@ int	pnum;
 
 			if ( line_index != pstruct->program_number_of_lines)
 				pstruct->program_number_of_lines = line_index;
+			pstruct->program_valid_flag = EE_PROG_VALID_FLAG;
 			char_processed ++;
 			return char_processed;
 			break;

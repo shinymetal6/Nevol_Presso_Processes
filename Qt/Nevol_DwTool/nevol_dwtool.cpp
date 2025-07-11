@@ -190,12 +190,96 @@ void Nevol_DwTool::download_program(void)
     ui->FlashingEE_label->setPixmap(greenled);
 }
 
+void Nevol_DwTool::download_sound(void)
+{
+    QPixmap redled (":/ledred.png");
+    QPixmap greenled(":/ledgreen.png");
+    char    data[132];
+    QByteArray reply;
+    int i,retry=10,rx_data;
+    int s_unit;
+    int index=0;
+
+    ui->statusbar->showMessage("Downloading "+sound_filename);
+    block_number = 1;
+    csum = 0;
+    ui->RXSound_label->setPixmap(redled);
+    s_unit = sound_sequence_file_size/100;
+    ui->downloadSound_progressBar->setValue(0);
+
+    qDebug()<< "Awaiting Poll";
+    while ( serial_rx() != 0x15 )
+    {
+        ui->statusbar->showMessage("Retry");
+        qDebug()<<"Retry on 0x15";
+        retry--;
+        if ( retry == 0 )
+        {
+            ui->statusbar->showMessage(sound_sequence_file_name+" aborted download");
+            qDebug()<<sound_sequence_file_name<<" aborted download";
+            return;
+        }
+    }
+
+    qDebug()<<"Poll received , downloading";
+    index=0;
+    while ( index < sound_sequence_file_size)
+    {
+        retry=10;
+        data[0] = 0x01;
+        data[1] = block_number;
+        data[2] = 255 - block_number;
+        block_number++;
+        if ( block_number == 0 )
+            block_number = 1;
+        csum = 0;
+        for(i=0;i<128;i++,index++)
+        {
+            if ( index < sound_sequence_file_size )
+                data[i+3] = blob[index];
+            else
+                data[i+3] = 0;
+            csum += data[i+3];
+        }
+        data[131] = csum;
+
+        serial.flush();
+        create_buf_and_tx(data);
+        serial.flush();
+        while ( (rx_data = serial_rx()) != 0x06 )
+        {
+            ui->statusbar->showMessage("Retry");
+            qDebug()<<"Retry on Ack, block_number "<< block_number<<" data "<<rx_data;
+            serial.flush();
+            create_buf_and_tx(data);
+            retry--;
+            if ( retry == 0 )
+            {
+                ui->statusbar->showMessage(sound_sequence_file_name+" aborted download");
+                qDebug()<<sound_sequence_file_name<<" aborted download";
+                return;
+            }
+        }
+        ui->downloadSound_progressBar->setValue(index/s_unit);
+    }
+    data[0] = 0x04;
+    QByteArray ba1(QByteArray::fromRawData(data, 1));
+    serial_tx(ba1);
+    ui->statusbar->showMessage(sound_sequence_file_name+" downloaded");
+    ui->downloadSound_progressBar->setValue(100);
+    qDebug()<<sound_sequence_file_name<<" downloaded";
+    ui->RXSound_label->setPixmap(greenled);
+}
+
+
 #ifdef Q_OS_WIN
 #define PROGRAMS_PATH   "c:/Nevol_Presso_Resources/Programs"
 #define AUDIO_PATH      "c:/Nevol_Presso_Resources/Audio"
+#define AUDIO_PATH      "c:/Nevol_Presso_Resources/Sounds"
 #else
 #define PROGRAMS_PATH   "../../Resources/Programs"
 #define AUDIO_PATH      "../../Resources/Audio"
+#define SEQUENCE_PATH   "../../Resources/Sounds"
 #endif
 
 void Nevol_DwTool::on_SelectEEFile_pushButton_clicked()
@@ -238,24 +322,13 @@ void Nevol_DwTool::on_SelectEEFile_pushButton_clicked()
 void Nevol_DwTool::on_DownloadEEFile_pushButton_clicked()
 {
 QString cmd;
-    if ( program_number != 'P' )
-    {
-        QString tmp = tr("%1").arg(program_number);
-        serial.flush();
-        cmd = "< PRG "+tmp+" >";
-        qDebug()<<cmd;
+    QString tmp = tr("%1").arg(program_number);
+    serial.flush();
+    cmd = "< PRG "+tmp+" >";
+    qDebug()<<cmd;
 
-        serial_tx(cmd.toUtf8());
-        download_program();
-    }
-    else
-    {
-        serial.flush();
-        cmd = "< TAB >";
-        qDebug()<<cmd;
-        serial_tx(cmd.toUtf8());
-        download_program();
-    }
+    serial_tx(cmd.toUtf8());
+    download_program();
 }
 
 void Nevol_DwTool::on_Run_pushButton_clicked()
@@ -440,6 +513,7 @@ void Nevol_DwTool::on_PlaySound_pushButton_clicked()
     serial.flush();
 
     QString cmd = "< SND "+ui->PlaySoundNumber_comboBox->currentText()+" >";
+    qDebug()<<cmd;
     serial_tx(cmd.toUtf8());
 }
 
@@ -453,3 +527,51 @@ void Nevol_DwTool::on_VersionSound_pushButton_clicked()
     serial_rx();
     qDebug()<< serial_reply;
     ui->Version_label->setText(serial_reply);}
+
+void Nevol_DwTool::on_SelectSoundFile_pushButton_clicked()
+{
+    QString filters = "CSV files (*.csv)";
+    sound_sequence_filename = QFileDialog::getOpenFileName(this, tr("Open Sound Sequence File"), SEQUENCE_PATH,filters);
+    int i;
+
+    const QFileInfo info(sound_sequence_filename);
+    const QString sound_sequence_basename(info.fileName());
+
+    ui->label_SOUND_FILE->setText(sound_sequence_basename);
+    QFile file(sound_sequence_filename);
+    if (!file.open(QIODevice::ReadOnly))
+        qDebug()<<"File not found";
+    else
+    {
+        const QFileInfo info(sound_sequence_filename);
+        const QString ffname(info.fileName());
+        sound_sequence_file_name = ffname;
+        qDebug()<<sound_sequence_file_name;
+        sound_sequence_file_size = file.size();
+        blob = file.readAll();
+        for(i=0;i<sound_sequence_file_size;i++)
+        {
+            if ( blob[i] == 'A')
+            {
+                sound_sequence_number = blob[i+2] - '0';
+                qDebug()<<sound_sequence_number;
+                QString as;
+                as[0] = blob[i+2];
+                ui->SEQNUM_label->setText(as);
+            }
+        }
+        file.close();
+    }
+
+}
+
+void Nevol_DwTool::on_DownloadSoundFile_pushButton_clicked()
+{
+    QString cmd;
+    QString tmp = tr("%1").arg(sound_sequence_number);
+    serial.flush();
+    cmd = "< SSQ "+tmp+" >";
+    qDebug()<<cmd;
+    serial_tx(cmd.toUtf8());
+    download_sound();
+}

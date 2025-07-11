@@ -52,7 +52,7 @@ uint8_t		presso_flash_error = 0;
 uint8_t		parsed_cmd;
 uint8_t		comm_to_seq_mbx[2];
 
-void ee_program_write(uint32_t data_len)
+int32_t ee_program_write(uint32_t data_len)
 {
 uint32_t	flash_address;
 Presso_ee_TypeDef	*pstruct;
@@ -62,11 +62,28 @@ Presso_ee_TypeDef	*pstruct;
 	flash_address = pstruct->program_number * sizeof(Presso_ee_TypeDef);
 	if ( flash_address <= i2c_24xx_Drv.device_size - sizeof(Presso_ee_TypeDef))
 	{
-			if ( i2c_extflash_write(i2cflash_driver_handle, flash_address,(uint8_t *)pstruct,data_len) )
-				presso_flash_error++;
+			if ( i2c_extflash_write(i2cflash_driver_handle, flash_address,(uint8_t *)pstruct,data_len) == 0  )
+				return 0;
 	}
+	presso_flash_error++;
+	return 1;
 }
 
+int32_t ee_sound_write(uint32_t data_len)
+{
+uint32_t	flash_address = PRESSO_SOUND_ADDRESS , size = sizeof(Presso_ee_sound_TypeDef);
+Presso_ee_sound_TypeDef	*pstruct;
+
+	pstruct = &Presso_ee_sound;
+	if ( pstruct->sound_number < 8 )
+	{
+		flash_address += (pstruct->sound_number) * size;
+		if ( flash_address <= i2c_24xx_Drv.device_size - size)
+			return i2c_extflash_write(i2cflash_driver_handle, flash_address,(uint8_t *)pstruct,data_len);
+	}
+	presso_flash_error++;
+	return 1;
+}
 
 extern	uint8_t	app_version[32];
 void send_version(void)
@@ -125,8 +142,24 @@ uint32_t	file_type;	// 0 for csv , 1 for wav, defaults to csv
 						ndecoded = decode_csv((uint8_t *)xmodem_data_area,xmodem_rx_get_rxed_amount());
 						if ( ndecoded )
 						{
-							ee_program_write(ndecoded);
-							usb_send(usb_driver_handle,&ack,1);
+							if ( ee_program_write(ndecoded) == 0 )
+								usb_send(usb_driver_handle,&ack,1);
+							else
+								usb_send(usb_driver_handle,&nak,1);
+						}
+						else
+							usb_send(usb_driver_handle,&nak,1);
+					}
+
+					if ( file_type == TRANSFER_XMODEM_SOUND_CSV)
+					{
+						ndecoded = decode_csv((uint8_t *)xmodem_data_area,xmodem_rx_get_rxed_amount());
+						if ( ndecoded )
+						{
+							if ( ee_sound_write(ndecoded) == 0 )
+								usb_send(usb_driver_handle,&ack,1);
+							else
+								usb_send(usb_driver_handle,&nak,1);
 						}
 						else
 							usb_send(usb_driver_handle,&nak,1);
@@ -161,8 +194,12 @@ uint32_t	file_type;	// 0 for csv , 1 for wav, defaults to csv
 					switch(parsed_cmd)
 					{
 					case CMDPARSER_RET_PRG:
-					case CMDPARSER_RET_SETTABLES:
 						file_type = TRANSFER_XMODEM_CSV;
+						comm_state = COMM_XMODEM_MODE;
+						xmodem_usb_enable_poll = 1;
+						break;
+					case CMDPARSER_RET_SOUND:
+						file_type = TRANSFER_XMODEM_SOUND_CSV;
 						comm_state = COMM_XMODEM_MODE;
 						xmodem_usb_enable_poll = 1;
 						break;
