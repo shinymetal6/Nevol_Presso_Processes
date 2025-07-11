@@ -52,24 +52,27 @@ uint8_t		presso_flash_error = 0;
 uint8_t		parsed_cmd;
 uint8_t		comm_to_seq_mbx[2];
 
-int32_t ee_program_write(uint32_t data_len)
+int32_t ee_program_write(uint32_t data_len,uint8_t program_audio_number)
 {
-uint32_t	flash_address;
+uint32_t	flash_address , size = sizeof(Presso_ee_TypeDef);
 Presso_ee_TypeDef	*pstruct;
 
-	pstruct = &Presso_ee;
+	if ( program_audio_number == 0 )
+		pstruct = &Presso_opening_ee;
+	else
+		pstruct = &Presso_ee;
 
 	flash_address = pstruct->program_number * sizeof(Presso_ee_TypeDef);
 	if ( flash_address <= i2c_24xx_Drv.device_size - sizeof(Presso_ee_TypeDef))
 	{
-			if ( i2c_extflash_write(i2cflash_driver_handle, flash_address,(uint8_t *)pstruct,data_len) == 0  )
+			if ( i2c_extflash_write(i2cflash_driver_handle, flash_address,(uint8_t *)pstruct,size) == 0  )
 				return 0;
 	}
 	presso_flash_error++;
 	return 1;
 }
 
-int32_t ee_sound_write(uint32_t data_len)
+int32_t ee_sound_write(uint32_t data_len,uint8_t program_audio_number)
 {
 uint32_t	flash_address = PRESSO_SOUND_ADDRESS , size = sizeof(Presso_ee_sound_TypeDef);
 Presso_ee_sound_TypeDef	*pstruct;
@@ -79,7 +82,7 @@ Presso_ee_sound_TypeDef	*pstruct;
 	{
 		flash_address += (pstruct->sound_number) * size;
 		if ( flash_address <= i2c_24xx_Drv.device_size - size)
-			return i2c_extflash_write(i2cflash_driver_handle, flash_address,(uint8_t *)pstruct,data_len);
+			return i2c_extflash_write(i2cflash_driver_handle, flash_address,(uint8_t *)pstruct,size);
 	}
 	presso_flash_error++;
 	return 1;
@@ -97,6 +100,7 @@ void process_1_comm(uint32_t process_id)
 uint32_t	wakeup,flags;
 uint32_t	ndecoded;
 uint32_t	file_type;	// 0 for csv , 1 for wav, defaults to csv
+uint8_t		program_audio_number;
 
 	xmodem_usb_enable_poll = 0;
 	file_type = TRANSFER_XMODEM_CSV;
@@ -139,10 +143,10 @@ uint32_t	file_type;	// 0 for csv , 1 for wav, defaults to csv
 				case	X_EOT:
 					if ( file_type == TRANSFER_XMODEM_CSV)
 					{
-						ndecoded = decode_csv((uint8_t *)xmodem_data_area,xmodem_rx_get_rxed_amount());
+						ndecoded = decode_csv((uint8_t *)xmodem_data_area,xmodem_rx_get_rxed_amount(),&program_audio_number);
 						if ( ndecoded )
 						{
-							if ( ee_program_write(ndecoded) == 0 )
+							if ( ee_program_write(ndecoded,program_audio_number) == 0 )
 								usb_send(usb_driver_handle,&ack,1);
 							else
 								usb_send(usb_driver_handle,&nak,1);
@@ -153,10 +157,10 @@ uint32_t	file_type;	// 0 for csv , 1 for wav, defaults to csv
 
 					if ( file_type == TRANSFER_XMODEM_SOUND_CSV)
 					{
-						ndecoded = decode_csv((uint8_t *)xmodem_data_area,xmodem_rx_get_rxed_amount());
+						ndecoded = decode_csv((uint8_t *)xmodem_data_area,xmodem_rx_get_rxed_amount(),&program_audio_number);
 						if ( ndecoded )
 						{
-							if ( ee_sound_write(ndecoded) == 0 )
+							if ( ee_sound_write(ndecoded,program_audio_number) == 0 )
 								usb_send(usb_driver_handle,&ack,1);
 							else
 								usb_send(usb_driver_handle,&nak,1);

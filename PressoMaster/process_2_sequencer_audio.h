@@ -29,5 +29,6 @@ extern	Presso_soundseq_TypeDef		Presso_soundseq;
 
 extern	void sound_seq_run ( void  );
 extern	void sound_seq_start ( Presso_sound_TypeDef *sound );
+extern	void sound_play ( uint8_t sound_number );
 
 #endif /* PRESSOMASTER_PROCESS_2_SEQUENCER_AUDIO_H_ */

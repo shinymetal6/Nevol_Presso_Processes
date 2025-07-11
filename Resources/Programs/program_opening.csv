@@ -8,9 +8,9 @@
 / |  | | | |  | program_close_eoc  , 
 / |  | | | |  | | program_name
 S,0,4, 1,1,0, 8,1,OPENING
-/linetype linenumber sector_pressure h0time h1time h2time h3time h4time audionumber ioconfig
-L,1,50,0,0,0,0,0,0,0101010101010101
-L,2,50,0,0,0,0,0,0,1010101010101010
-L,3,50,0,0,0,0,0,0,0101010101010101
-L,4,50,0,0,0,0,0,0,1010101010101010
+/linetype linenumber sector_pressure h0time h1time h2time h3time h4time audionumber soundnumber ioconfig
+L,1,50,0,0,0,0,0,0,0,0101010101010101
+L,2,50,0,0,0,0,0,0,0,1010101010101010
+L,3,50,0,0,0,0,0,0,0,0101010101010101
+L,4,50,0,0,0,0,0,0,0,1010101010101010
 E

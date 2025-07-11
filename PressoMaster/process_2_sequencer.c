@@ -43,6 +43,7 @@ extern	VCA_Effect_TypeDef	VCA_Effect1;
 extern	VCA_Effect_TypeDef	VCA_Effect2;
 
 //#define	SEQ_SM_DBG	1
+uint32_t fee_size=0;
 void process_2_sequencer(uint32_t process_id)
 {
 uint32_t	wakeup,flags;
@@ -51,6 +52,7 @@ uint8_t		sequencer_prescaler;
 uint8_t		pressure_prescaler = 10;
 uint8_t		initial_sound_timeout = 0;
 
+	fee_size = sizeof(Presso_ee_TypeDef);
 	process_2_sequencer_init();
 	bzero((uint8_t *)&Presso_ee,sizeof(Presso_ee_TypeDef));
 	create_timer(TIMER_ID_0,PROCESS_SCHEDULE_TIME,TIMERFLAGS_FOREVER | TIMERFLAGS_ENABLED);

@@ -29,13 +29,14 @@ typedef struct
 {
 	uint8_t		line_number;		//1
 	uint8_t		audionumber;		//1
+	uint8_t		soundnumber;		//1
 	uint8_t		flags;				//1
 	uint8_t		heater_values[5];	//5
 	uint16_t	gpio;				//2
 	uint8_t		sector_time;		//1
 	uint8_t		sector_pressure;	//1
 	uint8_t		line_valid;			//1
-	uint8_t		unused[3];			//3
+	uint8_t		unused[2];			//2
 }Presso_ee_line_TypeDef;
 #define	PRESSO_LINE_LOADED		0x7e
 
@@ -44,8 +45,8 @@ typedef struct
  * there are 30 lines per program
  * size must be 512
 */
-#define	EE_PROG_NAME_SIZE		21
-#define	EE_MAX_LINE_NUMBER		30
+#define	EE_PROG_NAME_SIZE		15
+#define	EE_MAX_LINE_NUMBER		27
 #define	EE_MAX_SOUNDLINE_NUMBER	20
 
 typedef struct
@@ -77,6 +78,7 @@ typedef struct
 	uint8_t					sound_valid_flag;			// 1
 	uint8_t					sound_number;				// 1
 	uint8_t					sound_number_of_lines;		// 1
+	uint8_t					align0[4]				;		// 1
 	Presso_ee_line_sound_TypeDef	Presso_ee_sound_line[EE_MAX_SOUNDLINE_NUMBER];	//4
 }Presso_ee_sound_TypeDef;
 #define	EE_SOUND_VALID_FLAG		0xe7

@@ -599,9 +599,9 @@
     <widget class="QLabel" name="Version_label">
      <property name="geometry">
       <rect>
-       <x>590</x>
+       <x>530</x>
        <y>360</y>
-       <width>241</width>
+       <width>301</width>
        <height>19</height>
       </rect>
      </property>

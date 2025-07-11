@@ -41,6 +41,8 @@ void setup_state(Presso_ee_TypeDef	*next_pstruct)
 			next_pstruct->Presso_ee_line[Presso_Sequencer.sequence].heater_values[3],
 			next_pstruct->Presso_ee_line[Presso_Sequencer.sequence].heater_values[4]
 			);
+	if ( next_pstruct->Presso_ee_line[Presso_Sequencer.sequence].soundnumber != 0 )
+		sound_play(next_pstruct->Presso_ee_line[Presso_Sequencer.sequence].soundnumber);
 	if ( next_pstruct->Presso_ee_line[Presso_Sequencer.sequence].audionumber != 0 )
 		dac_play_wav(dac_driver_handle,(uint16_t *)(BANK_2_ADDRESS + (next_pstruct->Presso_ee_line[Presso_Sequencer.sequence].audionumber * WAV_MAX_SIZE)) );
 }

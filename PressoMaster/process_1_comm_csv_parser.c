@@ -26,7 +26,7 @@
 
 char	program_name[EE_PROG_NAME_SIZE];
 char	outconfig[32];
-int		heater_values[5],line_number,audionumber;
+int		heater_values[5],line_number,audionumber,soundnumber;
 int		program_number , program_number_of_lines , sector_pressure , program_has_opening , program_step_time;
 int		program_complete_minute_time,program_complete_seconds_time,program_close_eoc;
 
@@ -60,7 +60,7 @@ int		params_line_number,pval[PARAMS_MAX_PRESSURES];
 int		sound_number,sound_number_of_lines;
 int		sound_line_number,sound_midi_note,sound_midi_time,sound_midi_flags;
 
-uint32_t decode_csv(uint8_t *data_ptr,uint32_t data_len)
+uint32_t decode_csv(uint8_t *data_ptr,uint32_t data_len,uint8_t *program_audio_number)
 {
 uint32_t cr_index = 0;
 uint32_t char_processed = 0;
@@ -84,7 +84,7 @@ int	pnum;
 					);
 			if ( pnum == 3 )
 			{
-				Presso_ee_sound.sound_number = sound_number;
+				Presso_ee_sound.sound_number = *program_audio_number = sound_number;
 				Presso_ee_sound.sound_number_of_lines = sound_number_of_lines;
 				char_processed +=EE_SOUND_HDR_SIZE;
 				data_ptr += cr_index;
@@ -123,6 +123,11 @@ int	pnum;
 			Presso_ee_sound.sound_valid_flag = EE_SOUND_VALID_FLAG;
 			if ( line_index != Presso_ee_sound.sound_number_of_lines)
 				Presso_ee_sound.sound_number_of_lines = line_index;
+			Presso_ee_sound.Presso_ee_sound_line[line_index+1].midi_note = 0;
+			Presso_ee_sound.Presso_ee_sound_line[line_index+1].midi_time = 0;
+			Presso_ee_sound.Presso_ee_sound_line[line_index+1].midi_flag = 0;
+
+			char_processed +=EE_SOUND_LINE_SIZE;
 			char_processed ++;
 			return char_processed;
 			break;
@@ -151,7 +156,7 @@ int	pnum;
 					pstruct = &Presso_ee;
 				bzero((uint8_t *)pstruct,sizeof(Presso_ee_TypeDef));
 
-				pstruct->program_number = program_number;
+				pstruct->program_number = *program_audio_number = program_number;
 				pstruct->program_number_of_lines = program_number_of_lines;
 				pstruct->program_has_opening = program_has_opening;
 				pstruct->program_step_time = program_step_time;
@@ -171,7 +176,7 @@ int	pnum;
 			if ( cr_index == 0 )
 				return 0;
 			/*/linetype linenumber sector_pressure h0time h1time h2time h3time h4time audionumber ioconfig*/
-			pnum = sscanf((char *)data_ptr,"L,%d,%d,%d,%d,%d,%d,%d,%d,%s",
+			pnum = sscanf((char *)data_ptr,"L,%d,%d,%d,%d,%d,%d,%d,%d,%d,%s",
 					&line_number,
 					&sector_pressure,
 					&heater_values[0],
@@ -180,9 +185,10 @@ int	pnum;
 					&heater_values[3],
 					&heater_values[4],
 					&audionumber,
+					&soundnumber,
 					outconfig
 					);
-			if ( pnum == 9 )
+			if ( pnum == 10 )
 			{
 				pstruct->Presso_ee_line[line_index].sector_pressure = sector_pressure;
 				pstruct->Presso_ee_line[line_index].line_number = line_number;
@@ -192,10 +198,10 @@ int	pnum;
 				pstruct->Presso_ee_line[line_index].heater_values[3] = heater_values[3];
 				pstruct->Presso_ee_line[line_index].heater_values[4] = heater_values[4];
 				pstruct->Presso_ee_line[line_index].audionumber = audionumber;
+				pstruct->Presso_ee_line[line_index].soundnumber = soundnumber;
 				pstruct->Presso_ee_line[line_index].gpio = convert_gpio();
 				pstruct->Presso_ee_line[line_index].sector_time = program_step_time;
 				pstruct->Presso_ee_line[line_index].line_valid = PRESSO_LINE_LOADED;
-				pstruct->Presso_ee_line[line_index].audionumber = audionumber;
 				char_processed +=EE_PROG_LINE_SIZE;
 				line_index++;
 				data_ptr += cr_index;
@@ -207,9 +213,21 @@ int	pnum;
 			cr_index = find_csv_cr(data_ptr);
 			if ( cr_index == 0 )
 				return 0;
-
 			if ( line_index != pstruct->program_number_of_lines)
 				pstruct->program_number_of_lines = line_index;
+			pstruct->Presso_ee_line[line_index+1].sector_pressure = 0;
+			pstruct->Presso_ee_line[line_index+1].line_number = 0;
+			pstruct->Presso_ee_line[line_index+1].heater_values[0] = 0;
+			pstruct->Presso_ee_line[line_index+1].heater_values[1] = 0;
+			pstruct->Presso_ee_line[line_index+1].heater_values[2] = 0;
+			pstruct->Presso_ee_line[line_index+1].heater_values[3] = 0;
+			pstruct->Presso_ee_line[line_index+1].heater_values[4] = 0;
+			pstruct->Presso_ee_line[line_index+1].audionumber = 0;
+			pstruct->Presso_ee_line[line_index+1].soundnumber = 0;
+			pstruct->Presso_ee_line[line_index+1].gpio = 0;
+			pstruct->Presso_ee_line[line_index+1].sector_time = 0;
+			pstruct->Presso_ee_line[line_index+1].line_valid = 0;
+			char_processed +=EE_PROG_LINE_SIZE;
 			pstruct->program_valid_flag = EE_PROG_VALID_FLAG;
 			char_processed ++;
 			return char_processed;

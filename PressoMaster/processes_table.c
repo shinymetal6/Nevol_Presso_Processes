@@ -30,7 +30,7 @@ extern	void process_3_dwin_hmi(uint32_t process_id);	//This is process3
 extern	void process_4(uint32_t process_id);	//This is process4 of the application
 
 VERSIONING	uint8_t	app_name[32] 		= "Presso processes";
-VERSIONING	uint8_t	app_version[32] 	= "1.0";
+VERSIONING	uint8_t	app_version[32] 	= "1.0.0";
 
 USRprcs_t	UserProcesses[USR_PROCESS_NUMBER] =
 {

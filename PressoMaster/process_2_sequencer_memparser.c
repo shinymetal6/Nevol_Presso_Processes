@@ -54,6 +54,7 @@ uint32_t	flash_address = PRESSO_SOUND_ADDRESS , size=sizeof(Presso_ee_sound_Type
 uint32_t	ret_val;
 
 	bzero((uint8_t *)sound_struct,size);
+	flash_address += sound_number * size;
 	ret_val = i2c_extflash_read(i2cflash_driver_handle,flash_address,(uint8_t *)sound_struct,size);
 	if ((ret_val == 0) && (sound_struct->sound_valid_flag == EE_SOUND_VALID_FLAG))
 		return ret_val;

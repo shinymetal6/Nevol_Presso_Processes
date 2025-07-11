@@ -314,6 +314,7 @@ void Nevol_DwTool::on_SelectEEFile_pushButton_clicked()
                 ui->PRGNUM_label->setText(as);
             }
         }
+        ui->downloadEE_progressBar->setValue(0);
         file.close();
     }
 }
@@ -382,6 +383,7 @@ void Nevol_DwTool::on_SelectAudioFile_pushButton_clicked()
         qDebug()<<audio_file_name;
         audio_file_size = file.size();
         blob = file.readAll();
+        ui->downloadAudio_progressBar->setValue(0);
         file.close();
     }
 }
@@ -560,6 +562,7 @@ void Nevol_DwTool::on_SelectSoundFile_pushButton_clicked()
                 ui->SEQNUM_label->setText(as);
             }
         }
+        ui->downloadSound_progressBar->setValue(0);
         file.close();
     }
 
