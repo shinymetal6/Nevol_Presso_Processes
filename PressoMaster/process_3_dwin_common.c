@@ -108,7 +108,9 @@ int 		textLen;
     {
         textLen = strlen(text);
         for (i = 0; i < textLen; i++)
+        {
         	ptr[i] = text[i];
+        }
         bcount = strlen(ptr)+6+1;
     }
     DWIN_packet.number_of_bytes = bcount;

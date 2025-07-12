@@ -117,6 +117,10 @@ uint32_t	cleared=0;
 					current_presso_ee = get_sequencer_params();
 					dwin_update_fields(uart1_driver_handle,current_presso_ee);
 				}
+				if ( hmi_from_seq_mbx[0] == CLEAR_LCD_PARAMS )
+				{
+					dwin_clear_fields(uart1_driver_handle);
+				}
 				if ( hmi_from_seq_mbx[0] == SEQUENCE_FINISHED )
 				{
 					compile_and_send_5b_dwin_packet(uart1_driver_handle,PLAY_PAUSE_BTN_ADDR,PLAY_PAUSE_BTN_PLAY);

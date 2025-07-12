@@ -95,6 +95,7 @@ typedef struct
 #define	ACTIVATE_CODE			0xa5
 #define	DEACTIVATE_CODE			0x5a
 #define	UPDATE_LCD_PARAMS		0x7e
+#define	CLEAR_LCD_PARAMS		0xbe
 #define	SEQUENCE_FINISHED		0xe7
 
 #include "process_1_comm_cmdparser.h"

@@ -48,7 +48,7 @@ void process_2_sequencer(uint32_t process_id)
 {
 uint32_t	wakeup,flags;
 uint32_t	mbx_size;
-uint8_t		sequencer_prescaler;
+uint8_t		sequencer_prescaler = SEQUENCER_TICK_TIME;
 uint8_t		pressure_prescaler = 10;
 uint8_t		initial_sound_timeout = 0;
 
@@ -173,11 +173,11 @@ uint8_t		initial_sound_timeout = 0;
 					break;
 				case CMDPARSER_RET_LOAD:
 					if ( load_program(seq_from_hmi_mbx_rxbuf[1]) == 0 )
-					{
 						mbx_seq_2_hmi[0] = UPDATE_LCD_PARAMS;
-						mbx_seq_2_hmi[1] = seq_from_hmi_mbx_rxbuf[1];
-						mbx_send(PRESSO_HMI_PROCESS,PRESSO_HMI_MBX,mbx_seq_2_hmi,2);
-					}
+					else
+						mbx_seq_2_hmi[0] = CLEAR_LCD_PARAMS;
+					mbx_seq_2_hmi[1] = seq_from_hmi_mbx_rxbuf[1];
+					mbx_send(PRESSO_HMI_PROCESS,PRESSO_HMI_MBX,mbx_seq_2_hmi,2);
 					break;
 				case CMDPARSER_RET_HLT:
 					halt_program(seq_from_hmi_mbx_rxbuf[1]);
