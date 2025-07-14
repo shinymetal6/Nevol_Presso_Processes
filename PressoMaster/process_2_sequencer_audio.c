@@ -116,16 +116,18 @@ Presso_ee_sound_TypeDef	Presso_sound;
 void sound_play ( uint8_t sound_number )
 {
 uint32_t	i;
-	mem_load_sound(sound_number,&Presso_sound);
-	for(i=0;i<Presso_sound.sound_number_of_lines;i++)
+	if ( mem_load_sound(sound_number,&Presso_sound) == 0 )
 	{
-		Presso_Requested_sound[i].flags = Presso_sound.Presso_ee_sound_line[i].midi_flag;
-		Presso_Requested_sound[i].midi_note = Presso_sound.Presso_ee_sound_line[i].midi_note;
-		Presso_Requested_sound[i].time = Presso_sound.Presso_ee_sound_line[i].midi_time;
+		for(i=0;i<Presso_sound.sound_number_of_lines;i++)
+		{
+			Presso_Requested_sound[i].flags = Presso_sound.Presso_ee_sound_line[i].midi_flag;
+			Presso_Requested_sound[i].midi_note = Presso_sound.Presso_ee_sound_line[i].midi_note;
+			Presso_Requested_sound[i].time = Presso_sound.Presso_ee_sound_line[i].midi_time;
+		}
+		Presso_Requested_sound[i].flags = 0;
+		Presso_Requested_sound[i].midi_note = 0;
+		Presso_Requested_sound[i].time = 0;
+		sound_seq_start(&Presso_Requested_sound[0]);
 	}
-	Presso_Requested_sound[i].flags = 0;
-	Presso_Requested_sound[i].midi_note = 0;
-	Presso_Requested_sound[i].time = 0;
-	sound_seq_start(&Presso_Requested_sound[0]);
 }
 

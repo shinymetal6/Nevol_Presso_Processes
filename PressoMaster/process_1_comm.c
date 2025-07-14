@@ -78,7 +78,7 @@ uint32_t	flash_address = PRESSO_SOUND_ADDRESS , size = sizeof(Presso_ee_sound_Ty
 Presso_ee_sound_TypeDef	*pstruct;
 
 	pstruct = &Presso_ee_sound;
-	if ( pstruct->sound_number < 8 )
+	if ( pstruct->sound_number < 10 )
 	{
 		flash_address += (pstruct->sound_number) * size;
 		if ( flash_address <= i2c_24xx_Drv.device_size - size)

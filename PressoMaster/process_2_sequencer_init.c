@@ -283,12 +283,12 @@ uint32_t	i;
 
 }
 
-void process_2_sequencer_set_gpio(uint16_t outconfig)
+void process_2_sequencer_set_gpio(uint16_t outconfig,uint16_t outconfig_override)
 {
 uint8_t i;
 	for(i=0;i<PRESSO_GPIO_NR;i++)
 	{
-		if ( outconfig & (1 << i ) )
+		if ( ( outconfig & (1 << i ) ) || ( outconfig_override & (1 << i ) ))
 			HAL_GPIO_WritePin(Presso_GPIO[i].port, Presso_GPIO[i].bit, GPIO_PIN_SET);
 		else
 			HAL_GPIO_WritePin(Presso_GPIO[i].port, Presso_GPIO[i].bit, GPIO_PIN_RESET);

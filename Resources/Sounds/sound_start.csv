@@ -1,0 +1,11 @@
+/linetype 
+/linetype 
+/ sound_number 
+/ |  sound_number_of_lines 
+/ |  |	sound_name
+/ |  |  | 
+A,6, 2,SND_ST
+/linetype linenumber midi_note midi_time(mSec.) midi_flag
+N,1, 67,200,1
+N,2, 71,500,1
+Q

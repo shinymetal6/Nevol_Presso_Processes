@@ -1,13 +1,18 @@
 /linetype 
+/linetype 
 / program_number 
 / |  program_number_of_lines 
 / |  | program_has_opening 
 / |  | | program_step_time 
 / |  | | | program_complete_minute_time 
-/ |  | | | |  program_complete_seconds_time ,
-/ |  | | | |  | program_close_eoc  , 
-/ |  | | | |  | | program_name
-S,0,4, 1,1,0, 8,1,OPENING
+/ |  | | | | program_complete_seconds_time ,
+/ |  | | | | |  program_start_wav
+/ |  | | | | |  | program_end_wav
+/ |  | | | | |  | | program_start_sound
+/ |  | | | | |  | | | program_end_sound
+/ |  | | | | |  | | | | program_close_eoc  , 
+/ |  | | | | |  | | | | | program_name
+S,0,12,1,1,1,11,0,0,6,7,1,OPENING
 /linetype linenumber sector_pressure h0time h1time h2time h3time h4time audionumber soundnumber ioconfig
 L,1,50,0,0,0,0,0,0,0,0101010101010101
 L,2,50,0,0,0,0,0,0,0,1010101010101010

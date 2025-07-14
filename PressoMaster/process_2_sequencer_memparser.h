@@ -36,7 +36,7 @@ typedef struct
 	uint8_t		sector_time;		//1
 	uint8_t		sector_pressure;	//1
 	uint8_t		line_valid;			//1
-	uint8_t		unused[2];			//2
+	uint16_t	gpio_overrides;		//2
 }Presso_ee_line_TypeDef;
 #define	PRESSO_LINE_LOADED		0x7e
 
@@ -45,7 +45,7 @@ typedef struct
  * there are 30 lines per program
  * size must be 512
 */
-#define	EE_PROG_NAME_SIZE		15
+#define	EE_PROG_NAME_SIZE		11
 #define	EE_MAX_LINE_NUMBER		27
 #define	EE_MAX_SOUNDLINE_NUMBER	20
 
@@ -58,6 +58,10 @@ typedef struct
 	uint8_t					program_close_eoc;			// 1
 	uint16_t				program_step_time;			// 2
 	uint16_t				program_complete_time;		// 2
+	uint8_t					program_start_wav;			// 1
+	uint8_t					program_start_sound;		// 1
+	uint8_t					program_end_wav;			// 1
+	uint8_t					program_end_sound;			// 1
 	char					program_name[EE_PROG_NAME_SIZE];
 	Presso_ee_line_TypeDef	Presso_ee_line[EE_MAX_LINE_NUMBER];	//4
 }Presso_ee_TypeDef;

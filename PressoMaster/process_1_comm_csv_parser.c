@@ -29,6 +29,7 @@ char	outconfig[32];
 int		heater_values[5],line_number,audionumber,soundnumber;
 int		program_number , program_number_of_lines , sector_pressure , program_has_opening , program_step_time;
 int		program_complete_minute_time,program_complete_seconds_time,program_close_eoc;
+int		program_start_wav ,program_end_wav ,program_start_sound ,program_end_sound;
 
 static uint32_t find_csv_cr(uint8_t *data_ptr)
 {
@@ -138,17 +139,21 @@ int	pnum;
 			/*
 			linetype program_number program_number_of_lines program_has_opening program_step_time program_complete_minute_time program_complete_seconds_time program_close_eoc program_name
 			 */
-			pnum = sscanf((char *)data_ptr,"S,%d,%d,%d,%d,%d,%d,%d,%s",
+			pnum = sscanf((char *)data_ptr,"S,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%s",
 					&program_number,
 					&program_number_of_lines,
 					&program_has_opening,
 					&program_step_time ,
 					&program_complete_minute_time,
 					&program_complete_seconds_time,
+					&program_start_wav ,
+					&program_end_wav ,
+					&program_start_sound ,
+					&program_end_sound ,
 					&program_close_eoc ,
 					program_name
 					);
-			if ( pnum == 8 )
+			if ( pnum == 12 )
 			{
 				if ( program_number == 0 )
 					pstruct = &Presso_opening_ee;
@@ -161,6 +166,10 @@ int	pnum;
 				pstruct->program_has_opening = program_has_opening;
 				pstruct->program_step_time = program_step_time;
 				pstruct->program_complete_time = (program_complete_minute_time*60) + program_complete_seconds_time;
+				pstruct->program_start_wav = program_start_wav;
+				pstruct->program_end_wav = program_end_wav;
+				pstruct->program_start_sound = program_start_sound;
+				pstruct->program_end_sound = program_end_sound;
 				pstruct->program_close_eoc = program_close_eoc;
 				sprintf(pstruct->program_name,"%s",program_name);
 				if ( char_processed > sizeof(Presso_ee_TypeDef))
@@ -202,6 +211,7 @@ int	pnum;
 				pstruct->Presso_ee_line[line_index].gpio = convert_gpio();
 				pstruct->Presso_ee_line[line_index].sector_time = program_step_time;
 				pstruct->Presso_ee_line[line_index].line_valid = PRESSO_LINE_LOADED;
+				pstruct->Presso_ee_line[line_index].gpio_overrides=0;
 				char_processed +=EE_PROG_LINE_SIZE;
 				line_index++;
 				data_ptr += cr_index;

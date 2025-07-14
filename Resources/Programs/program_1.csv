@@ -6,16 +6,20 @@
 / |  | | program_step_time 
 / |  | | | program_complete_minute_time 
 / |  | | | | program_complete_seconds_time ,
-/ |  | | | | |  program_close_eoc  , 
-/ |  | | | | |  | program_name
-S,1,12,1,1,1,11,1,PROG_1
+/ |  | | | | |  program_start_wav
+/ |  | | | | |  | program_end_wav
+/ |  | | | | |  | | program_start_sound
+/ |  | | | | |  | | | program_end_sound
+/ |  | | | | |  | | | | program_close_eoc  , 
+/ |  | | | | |  | | | | | program_name
+S,1,12,1,1,1,11,0,0,6,7,1,PROG_1
 /linetype linenumber sector_pressure h0time h1time h2time h3time h4time audionumber soundnumber ioconfig
 L,1, 50,0,0,30,30,30,0,0,1100000000000000
-L,2, 50,0,0,30,30,30,0,2,0110000000000000
+L,2, 50,0,0,30,30,30,0,0,0110000000000000
 L,3, 50,0,0,30,30,30,0,0,0011000000000000
 L,4, 50,0,0,30,30,30,0,0,0001100000000000
 L,5, 50,0,0,30,30,30,0,0,0000110000000000
-L,6, 50,0,0,30,30,30,1,0,0000011000000000
+L,6, 50,0,0,30,30,30,0,0,0000011000000000
 L,7, 50,0,0,30,30,30,0,0,0000001100000000
 L,8, 50,0,0,30,30,30,0,0,0000000110000000
 L,9, 50,30,70,0,0,0, 0,0,0000000000000000

@@ -40,7 +40,7 @@ typedef struct
 	uint16_t			sequence;
 	uint16_t			step_time;
 	uint16_t			cycle_time;
-	//uint16_t			running_time;
+	uint8_t				audio_flags;
 }Presso_Sequencer_TypeDef;
 /*state*/
 #define	SEQUENCER_STATE_IDLE		0x00
@@ -48,6 +48,9 @@ typedef struct
 #define	SEQUENCER_STATE_RUNNING		0x02
 #define	SEQUENCER_STATE_FINISHED	0x04
 #define	SEQUENCER_STATE_PAUSE		0x80
+/*audio_flags*/
+#define	SEQUENCER_AUDIO_START_DONE	0x80
+#define	SEQUENCER_AUDIO_END_DONE	0x40
 
 typedef struct
 {
@@ -89,7 +92,7 @@ extern	uint32_t				tim3_3_driver_handle;
 extern	uint32_t				tim3_4_driver_handle;
 
 extern	void process_2_sequencer_init(void);
-extern	void process_2_sequencer_set_gpio(uint16_t outconfig);
+extern	void process_2_sequencer_set_gpio(uint16_t outconfig,uint16_t outconfig_override);
 extern	void process_2_sequencer_set_timers(uint32_t ht1,uint32_t ht2,uint32_t ht3,uint32_t ht4,uint32_t ht5);
 extern	void process_2_sequencer_set_motor(uint8_t motor);
 extern	void process_2_sequencer_set_test_gpio(uint8_t level);

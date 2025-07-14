@@ -33,7 +33,7 @@ extern	uint8_t		mbx_seq_2_hmi[sizeof(uint32_t)];
 
 void setup_state(Presso_ee_TypeDef	*next_pstruct)
 {
-	process_2_sequencer_set_gpio(next_pstruct->Presso_ee_line[Presso_Sequencer.sequence].gpio);
+	process_2_sequencer_set_gpio(next_pstruct->Presso_ee_line[Presso_Sequencer.sequence].gpio,next_pstruct->Presso_ee_line[Presso_Sequencer.sequence].gpio_overrides);
 	process_2_sequencer_set_timers(
 			next_pstruct->Presso_ee_line[Presso_Sequencer.sequence].heater_values[0],
 			next_pstruct->Presso_ee_line[Presso_Sequencer.sequence].heater_values[1],
@@ -49,9 +49,12 @@ void setup_state(Presso_ee_TypeDef	*next_pstruct)
 
 void halt_sequencer(void)
 {
+	if ( Presso_ee.program_end_sound )
+		sound_play(Presso_ee.program_end_sound);
+
 	Presso_Sequencer.sequence = 0;
 	process_2_sequencer_set_timers(0,0,0,0,0);
-	process_2_sequencer_set_gpio(0);
+	process_2_sequencer_set_gpio(0,0);
 	Presso_Sequencer.sequence = 0;
 	Presso_Sequencer.state = SEQUENCER_STATE_FINISHED;
 }
@@ -132,6 +135,7 @@ uint8_t halt_program(uint8_t program_number)
 	if ( program_number < PRESSO_MAX_PROGRAMS )
 	{
 		Presso_Sequencer.state = SEQUENCER_STATE_IDLE;
+		Presso_Sequencer.audio_flags = 0;
 		Presso_Sequencer.program_number = 0;
 		Presso_Sequencer.cycle_time = 0;
 		halt_sequencer();
@@ -157,9 +161,28 @@ Presso_ee_TypeDef	*pstruct;
 	if (( Presso_Sequencer.state & SEQUENCER_STATE_PAUSE) == SEQUENCER_STATE_PAUSE)
 		return;
 	if (( Presso_Sequencer.state & SEQUENCER_STATE_OPENING) == SEQUENCER_STATE_OPENING)
+	{
 		pstruct = &Presso_opening_ee;
+		if (( Presso_Sequencer.audio_flags & SEQUENCER_AUDIO_START_DONE) == 0 )
+		{
+			Presso_Sequencer.audio_flags |= SEQUENCER_AUDIO_START_DONE;
+			if ( Presso_ee.program_start_sound )
+				sound_play(Presso_ee.program_start_sound);
+		}
+	}
 	else if (( Presso_Sequencer.state & SEQUENCER_STATE_RUNNING ) == SEQUENCER_STATE_RUNNING)
+	{
+		if (( Presso_Sequencer.state & SEQUENCER_STATE_OPENING) == 0)
+		{
+			if (( Presso_Sequencer.audio_flags & SEQUENCER_AUDIO_START_DONE) == 0 )
+			{
+				Presso_Sequencer.audio_flags |= SEQUENCER_AUDIO_START_DONE;
+				if ( Presso_ee.program_start_sound )
+					sound_play(Presso_ee.program_start_sound);
+			}
+		}
 		pstruct = &Presso_ee;
+	}
 	else
 		return;
 
